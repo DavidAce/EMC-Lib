@@ -1,0 +1,11 @@
+obj/
+.vscode/
+.idea/
+outdata/
+GPATH
+GTAGS
+GRTAGS
+.depend
+EMC
+*.stackdump
+*.exe
