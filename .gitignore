@@ -1,11 +1,10 @@
-obj/
 .vscode/
 .idea/
 outdata/
+indata/
 GPATH
 GTAGS
 GRTAGS
 .depend
-EMC
 *.stackdump
 *.exe
