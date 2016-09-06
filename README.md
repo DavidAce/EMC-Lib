@@ -29,7 +29,7 @@ to build (compile) the project. To run the program, type
 A c++ compiler with support for the flag `-std=c++14`.
 
 ##### Eigen
-The Eigen math library has to be installed and found in PATH environement variable. 
+The Eigen math library has to be installed and found in PATH environment variable. 
 Please download and install from
 
         http://eigen.tuxfamily.org/
@@ -47,7 +47,7 @@ takes arguments:
 
         objective_function obj_fun(my_function, lower_bound, upper_bound, tolerance, aux_data1, aux_data2   ... aux_dataN);
  
-where `lower_bound` and `upper_bound` are Eigen arrays of type Eigen::ArrayXd(n), where n is the number of parameters you wish to minimize, i.e.,
+where `lower_bound` and `upper_bound` are Eigen arrays of type `Eigen::ArrayXd(n)`, where n is the number of parameters you wish to minimize, i.e.,
 one lower and upper boundary per parameter. The argument `tolerance` has type `double` and tells the program when
 to finish: a small value (say 1e-16) takes longer than a large value (`say 1e-8`) but gives better accuracy. You can
 provide as many `aux_data` objects as you wish as long as they are of type `Eigen::ArrayXd` or `Eigen::ArrayXXd`. These
