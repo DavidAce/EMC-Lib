@@ -1,41 +1,49 @@
 //
-// Created by david on 9/2/16.
+// Created by david on 2016-09-05.
 //
 
-#ifndef EMC_CLION_OBJECTIVE_FUNCTION_H
-#define EMC_CLION_OBJECTIVE_FUNCTION_H
+#ifndef OBJECTIVE_FUNCTION_H
+#define OBJECTIVE_FUNCTION_H
+
+#include <memory>
 #include <Eigen/Dense>
 #include <Eigen/Core>
-#include "personality.hpp"
-using namespace std;
+#include "constants.hpp"
 using namespace Eigen;
-
-class objective_function {
+class objective_function{
 private:
-    std::function<ArrayXd(ArrayXXd &dos, ArrayXd &E, ArrayXd &M, ArrayXd &T)> the_function;
-
 public:
+    template <typename boundaryType, typename... aux_args>
+    objective_function(boundaryType lower, boundaryType upper, double tol,aux_args... in)
+            : lower_bound(lower),
+              upper_bound(upper),
+              tolerance(tol),
+              aux({in...})
+    {
+        parameters = (int) lower_bound.size();
 
-    objective_function(std::function<ArrayXd(ArrayXXd &dos, ArrayXd &E, ArrayXd &M, ArrayXd &T)> func, const int & parameters, const ArrayXd &min_bound, const ArrayXd &max_bound);
+    };
+    typedef std::function<double(objective_function &, Array<long double, Dynamic, 1> &)> providedType ;
+    providedType provided_function;
 
-    const int parameters;
-    const ArrayXd min_bound;
-    const ArrayXd max_bound;
+    long double fitness(Array<long double, Dynamic, 1>  &parameters){
+//        long double H = provided_function(*this, parameters);
+//        return (long double)(-1.0 / log(H + EMC_constants::log_param) + EMC_constants::log_const + pow(log( 1/(H + 1)), 2));
+        return provided_function(*this, parameters);
 
-    double fitnessTest(personality &guy) {
-//        cout << "Hej 2 1 1" << endl;
-
-        double H = 0
-        ;
-        guy.value = H; //Record the total distance between mappings
-        //(DO NOT CHANGE) I propose to use the function below to make H small overall, and sharp close to H = 0
-
-
-        H = -1 / log(H + log_param) + log_const + pow(log( 1/(H + 1)), 2);
-        return H;
     }
+
+
+    Array<double,Dynamic, Dynamic> lower_bound; //Minimum allowed values for each fitting parameter
+    Array<double,Dynamic, Dynamic> upper_bound; //Maximum allowed values for each fitting parameter
+    double tolerance;                           //If the fitness saturates within tolerance, the program terminates
+    ArrayXd optimum;
+    int parameters;
+    std::vector<Array<double,Dynamic,Dynamic>>  aux; //Auxiliary data or vectors for use in the fitness function
+//    typedef std::function<outputType(objective_function &, inputType &)> fitnessType ;
+
 
 };
 
 
-#endif //EMC_CLION_OBJECTIVE_FUNCTION_H
+#endif //OBJECTIVE_FUNCTION_H

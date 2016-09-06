@@ -102,7 +102,7 @@ then boundaries.dat may contain (tab delimited):
 
 
 ## Constants
-See the file `constants.h`. In particular, set the following
+See the file `EMC_constants.h`. In particular, set the following
 variables to your liking: 
 
 `int M` sets the number of parallel subpopulations. Preferrably this

@@ -2,6 +2,9 @@
 #define MYMATH_H  
 #include <Eigen/Dense>
 #include <Eigen/Core>
+#include "randomFunctions.hpp"
+
+using namespace EMC_rnd;
 using namespace Eigen;
 extern void linspace(ArrayXd &,double, double, int);
 extern void logspace(ArrayXd &,double, double, int);

@@ -4,7 +4,8 @@
 
 #include "constants.hpp"
 
-namespace constants{
-    ArrayXd	upper_bound;							//upper boundary of parameters
-    ArrayXd	lower_bound;
+namespace EMC_constants{
+    int nGenes;
+    int genomeLength;
+    int geneLength;
 }

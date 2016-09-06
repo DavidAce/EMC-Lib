@@ -10,49 +10,49 @@
 #include <fstream>
 #include <time.h>
 
-#include "personality.hpp"
 #include "population.hpp"
-#include "datafiles.hpp"
 #include "constants.hpp"
 #include "mymath.hpp"
-#include "DNA.hpp"
-#include "evolution.hpp"
 #include "objective_function.hpp"
 
-using namespace std::chrono;
 
 typedef std::chrono::high_resolution_clock Clock;
 class counters {
 public:
 	int store_counter;
+    int store_last_since;
 	int generation;
 	double simulation_time;
-	high_resolution_clock::time_point simulation_tic;
-	high_resolution_clock::time_point simulation_toc;
+	Clock::time_point simulation_tic;
+	Clock::time_point simulation_toc;
 	double evolution_time;
-	high_resolution_clock::time_point evolution_tic;
-	high_resolution_clock::time_point evolution_toc;
+    Clock::time_point evolution_tic;
+    Clock::time_point evolution_toc;
 };
 
 
 
 class species{
 private:
+    objective_function &obj_fun;
 	void zero_counters();
 public:
-
-    species(std::function<ArrayXd(ArrayXXd &dos, ArrayXd &E, ArrayXd &M, ArrayXd &T)> func, const int & parameters, const ArrayXd &min_bound, const ArrayXd &max_bound) ;
-	//inData obf;				//Experimental data for minimization
-    objective_function obj_fun;
-    population pop[M];		//Array of separate populations to evolve independently
-	outData out;			//Experimental data for minimization
+    species(objective_function &ref): obj_fun(ref), pop(M,ref){
+        zero_counters();
+    }
+    vector<population> pop;		//Array of separate populations to evolve independently
 	counters count;
-	double champion_fitness();
-	double champion_value();
+
+    long double champion_fitness();
+	Array<long double, Dynamic,1> champion_value();
 	int champion_number();
-	void print_progress();
+	long double latest_history_diff();
+    Array<long double,Dynamic,1> fitness_history;
+    void store_best_fitness();
+    bool below_tolerance();
+    void print_progress();
+    void print_progress(bool);
 	void copy(personality &, personality &);
-	void wakeUpAll();
 };
 
 

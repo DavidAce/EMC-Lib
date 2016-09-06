@@ -1,27 +1,143 @@
-#include <math.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <iostream>
-#include <iomanip>
-#include <time.h>
-#include <Eigen/Dense>
-#include <Eigen/Core>
-#include <Eigen/Geometry>
-#include "constants.hpp"
-#include "randomFunctions.hpp"
-#include "mymath.hpp"
-#include "DNA.hpp"
-#include "personality.hpp"
-#include "population.hpp"
-#include "species.hpp"
-#include "datafiles.hpp"
+
 #include "evolution.hpp"
 
-using namespace std;
-using namespace Eigen;
-using namespace constants;
+void evolve(population &pop) {
+	//This function selects either mutation type operators or crossover type.
+	//Then does an exchange operator, and finally finds the best guys in the population
+	pop.generation++;
+	int dice;
+	//Select mutation or crossover
+	if (uniform_double_1() < qm) {
+		if (uniform_double_1() < qma) {
+			mutation_elite(pop);
+		}
+		else {
+			mutation(pop);
+		}
+	}
+	else {
+		dice = uniform_integer(0, 4);
+		if 		(dice == 0)	 { crossover          (pop); }
+		else if (dice == 1)	 { crossover_smartCopy(pop); }
+		else if (dice == 2)	 { crossover_elite    (pop); }
+		else				 { crossover_snooker  (pop); }
 
-inline void roulette_select(personality guys[], ArrayXi &selected, long double &Z, double s) {
+
+	}
+
+	exchange(pop);
+	find_elite(pop);
+
+}
+
+void exchange(population &pop) {
+    int i, j, ex; //ex is the exchange iteration
+    long double re, dH, dt_inv;
+    for (ex = 0; ex < N; ex++) {
+        i = uniform_integer( 0, N - 1);										//Chose a guy...
+        j = i == 0 ? 1 : (i== N-1? N-2: i + 2 * uniform_integer( 0, 1) - 1);	//And a neighbor
+        dH = pop.guys[i].H - pop.guys[j].H;
+        dt_inv = 1 / pop.guys[i].t - 1 / pop.guys[j].t;
+        re = exp(dH*dt_inv);
+
+        if (uniform_double_1() < fmin(1, re)) {
+            //Save the date of birth
+            pop.newguys[j].born = pop.guys[i].born;
+            pop.newguys[i].born = pop.guys[j].born;
+            //Swap the guys on the ladder...
+            pop.copy(pop.guys[i], pop.newguys[j]);
+            pop.copy(pop.guys[j], pop.newguys[i]);
+            //But keep the temperature of position i as t_i,and j as t_j
+            pop.guys[i].t = pop.newguys[i].t;
+            pop.guys[j].t = pop.newguys[j].t;
+            //Now the list of newguys should be updated to be identical to guys
+            pop.copy(pop.newguys[i], pop.guys[i]);
+            pop.copy(pop.newguys[j], pop.guys[j]);
+        }
+    }
+}
+void migration(species &sp) {
+    //First select randomly m out of M pobulations, subject to migration
+    //Then select randomly  n (n=1?) out of N guys to migrate
+    //Accept the new population based on the new population fitness score
+    int n;										//Guy chosen to migrate
+    long double dH;									//Probability of migration
+
+    int m = uniform_integer( 2, M);		//How many populations to migrate
+    ArrayXi s_pop(m);							//Array of sender populations
+    ArrayXi r_pop(m);							//Array of receiving populations
+    rndChoice(s_pop.data(), m, M);				//Fill the array of migrators with m random populations
+
+    for (int i = 0; i < m; i++) {
+        r_pop(i) = i < m - 1 ? s_pop(i + 1) : s_pop(0) ;						//Define receiving populations cyclically
+        n = uniform_integer( 0, N-1);									//Who will be the lucky one?
+        sp.copy(sp.pop[r_pop(i)].newguys[n], sp.pop[s_pop(i)].newguys[n]);	//Inject a guy into another population
+        dH = sp.pop[r_pop(i)].newguys[n].H - sp.pop[r_pop(i)].guys[n].H;
+        if (dH < 0 || exp(-dH / sp.pop[r_pop(i)].newguys[n].t) > uniform_double_1()) {
+            sp.pop[r_pop(i)].newguys[n].born = sp.count.generation;
+            sp.copy(sp.pop[r_pop(i)].guys[n], sp.pop[r_pop(i)].newguys[n]);
+        }
+        else {
+            //Revert changes in newguys,  i.e sync them for the next round
+            sp.copy(sp.pop[r_pop(i)].newguys[n], sp.pop[r_pop(i)].guys[n]);
+        }
+    }
+
+}
+void insertguy(population &pop, int from, int to) {
+    int i;
+    //Push out the worst bestguy and move everybody up until "to"
+    for (i = 0; i < to; i++) {
+        pop.copy(pop.bestguys[i], pop.bestguys[i + 1]);
+    }
+    //Insert the exceptional guy into the illustrious group of best guys
+    pop.copy(pop.bestguys[to], pop.guys[from]);
+}
+
+void find_elite(population &pop) {
+    int i;
+    int count = 0;
+    //int best[N_best];
+    int tried_guys[N_best];
+    long double lowest_H;
+    int lowest_i = N;
+    int j = 0;
+    int success = 1;
+    while (success == 1) {
+        lowest_H = 1e10;
+        //Find the best guy yet among guys
+        for (i = 0; i < N; i++) {
+            //Check if i is in skip-list
+            if (isvalueinarray(i, tried_guys, j) == 1) { continue; }
+            if (pop.guys[i].H < lowest_H) {
+                lowest_H = pop.guys[i].H;
+                lowest_i = i;
+            }
+        }
+        count++;
+        //By now we should have a winner, check if he's better than any elite
+        //We have already tried to match j guys, so we can start from j?
+        for (i = 0; i < N_best; i++) {
+            success = 0;
+            if (lowest_H == pop.bestguys[N_best - i - 1].H) {
+                success = 1;
+                tried_guys[j] = lowest_i;
+                j++;
+                return;//The guy is already here! Do not copy, just check next guy
+            }
+            if (lowest_H < pop.bestguys[N_best - i - 1].H) {
+                insertguy(pop, lowest_i, N_best - i - 1);
+                success = 1;
+                tried_guys[j] = lowest_i;
+                j++;
+                break;
+            }
+        }
+
+    }
+}
+
+void roulette_select(vector<personality> &guys, ArrayXi &selected, long double &Z, double s) {
 	//Selected 0 is the guy with good fitness (lowest), selected 1 is random
 
 	//double total_H = 0;
@@ -33,7 +149,7 @@ inline void roulette_select(personality guys[], ArrayXi &selected, long double &
 		Z += static_cast<long double>(exp(-guys[i].H / s));
 		roulette(i) = static_cast <double> (Z); //Cumulative sum - Low fitness gives large area on roulette
 	}
-	lucky_number = uniform_double(&rng, 0 , static_cast<double>(Z));
+	lucky_number = uniform_double( 0.0 , static_cast<double>(Z));
 	for (int i = 0; i < N; i++) {
 		if (lucky_number <= roulette(i)) {
 			selected(0) = i;
@@ -42,9 +158,11 @@ inline void roulette_select(personality guys[], ArrayXi &selected, long double &
 	}
 	selected(1) = selected(0);
 	while (selected(1) == selected(0)) {
-		selected(1) = uniform_integer(&rng, 0, N - 1);
+		selected(1) = uniform_integer( 0, N - 1);
 	}
 }
+
+
 inline void bitselector_smartCopy(population &pop, ArrayXi &selected, ArrayXd &n_ab_XY, ArrayXd &n_ab_YX) {
 	//n_ab_XY(0): n_11 = guys: SAME | newguys: SAME
 	//n_ab_XY(1): n_12 = guys: SAME | newguys: DIFF
@@ -65,7 +183,7 @@ inline void bitselector_smartCopy(population &pop, ArrayXi &selected, ArrayXd &n
 
 			//Independently reverse with probability p0
 			for (int j = 0; j < 2; j++) {
-				if (uniform_double(&rng, 0, 1) < P0) {
+				if (uniform_double_1() < P0) {
 					pop.newguys[selected[j]].genome.flip_loci(i);
 				}
 			}
@@ -90,10 +208,10 @@ inline void bitselector_smartCopy(population &pop, ArrayXi &selected, ArrayXd &n
 			pop.newguys[selected(1)].genome.copy_loci(i, pop.guys[selected(1)].genome(i));
 			
 			//Reverse with probabilities p1 and p2 respectively
-			if (uniform_double(&rng, 0, 1) < P1) {
+			if (uniform_double_1() < P1) {
 				pop.newguys[selected(0)].genome.flip_loci(i);
 			}
-			if (uniform_double(&rng, 0, 1) < P2) {
+			if (uniform_double_1() < P2) {
 				pop.newguys[selected(1)].genome.flip_loci(i);
 			}
 
@@ -113,25 +231,25 @@ inline void bitselector_smartCopy(population &pop, ArrayXi &selected, ArrayXd &n
 
 		}
 	}
-
 }
-void mutation(population &pop, objective_function &obj_fun) {
+
+void mutation(population &pop) {
 	int mutantGenes;	//Number of points to mutate
 	int mutant;			//Which guy to mutate
-	double dH;
+	long double dH;
 	//#pragma omp parallel for private(mutantGenes, mutant,dH)
 	for (int i = 0; i < N; i++) {
-		mutantGenes =  uniform_integer(&rng, 1, genomeLength - 1);
+		mutantGenes =  uniform_integer( 1, genomeLength - 1);
 		ArrayXi loci(mutantGenes);
-		mutant = i;// uniform_integer(&rng, 0, N - 1);
+		mutant = i;// uniform_integer( 0, N - 1);
 		rndChoice(loci.data(), mutantGenes, genomeLength);				//Choose locus to mutate
 		pop.newguys[mutant].genome.flip_loci(loci);	//Flip bits
-		pop.getFitness(pop.newguys[mutant], obj_fun);							//Get Fitness score
+		pop.getFitness(pop.newguys[mutant]);							//Get Fitness score
 		
 		//Perform Metropolis
 		dH = pop.newguys[mutant].H - pop.guys[mutant].H;		//used to decide if we accept the new guy or not.
 		
-		if (dH < 0 || exp(-dH / pop.newguys[mutant].t) > uniform_double(&rng, 0, 1)) {
+		if (dH < 0 || exp(-dH / pop.newguys[mutant].t) > uniform_double_1()) {
 			pop.newguys[mutant].born = pop.generation;
 			pop.copy(pop.guys[mutant], pop.newguys[mutant]);
 
@@ -144,28 +262,29 @@ void mutation(population &pop, objective_function &obj_fun) {
 
 
 }
-void mutation_elite(population &pop, objective_function &obj_fun) {
+
+void mutation_elite(population &pop) {
 	//int mutantGenes;	//Number of points to mutate
 	int mutant;			//which guy to mutate
 	int elite_mutant;	//Which elite guy to receive wisdom from
-	double dH;
+	long double dH;
 	//#pragma omp parallel for private( mutant, elite_mutant,dH)
 	for (int i = 0; i < N; i++) {
-		//mutantGenes = 1;// uniform_integer(&rng, 1, genomeLength - 1);
-		int loci = uniform_integer(&rng, 1, genomeLength - 1);
-		mutant = i; //uniform_integer(&rng, 0, N - 1);
+		//mutantGenes = 1;// uniform_integer( 1, genomeLength - 1);
+		int loci = uniform_integer( 1, genomeLength - 1);
+		mutant = i; //uniform_integer( 0, N - 1);
 		//Fill loci with mutantGenes genome points to be mutated
 		//rndChoice(loci.data(), mutantGenes, genomeLength);	//Choose locus to mutate
 		
 		//Copy an elite guy to a new guy to be a guinnea pig
-		elite_mutant = uniform_integer(&rng, 0, N_best - 1);
+		elite_mutant = uniform_integer( 0, N_best - 1);
 		pop.copy(pop.newguys[mutant].genome, pop.bestguys[elite_mutant].genome);	//Copy DNA only!
 		pop.newguys[mutant].genome.flip_loci(loci);									//Flip bits	
-		pop.getFitness(pop.newguys[mutant],obj_fun);									//Get Fitness score
+		pop.getFitness(pop.newguys[mutant]);    									//Get Fitness score
 		
 		//Perform metropolis
 		dH = pop.newguys[mutant].H - pop.guys[mutant].H;		//used to decide if we accept the new guy or not.
-		if (dH < 0 || exp(-dH / pop.newguys[mutant].t) > uniform_double(&rng, 0, 1)) {
+		if (dH < 0 || exp(-dH / pop.newguys[mutant].t) > uniform_double_1()) {
 			pop.newguys[mutant].born = pop.generation;
 			pop.copy(pop.guys[mutant], pop.newguys[mutant]);
 		}
@@ -176,18 +295,22 @@ void mutation_elite(population &pop, objective_function &obj_fun) {
 
 	}
 }
-void crossover(population &pop, objective_function &obj_fun) {
+
+void crossover(population &pop) {
 	int  matings;
 	int nMatings = (int)(0.2*N);
 	ArrayXi selected(2);
-	ArrayXd expX(2);
-	ArrayXd expY(2);
+    Array<long double, 2,1> expX;
+    Array<long double, 2,1> expY;
+//	ArrayXd expX(2);
+//	ArrayXd expY(2);
 	int crossoverPoint;
 	double s = 0.5;// pop.guys[(int)(0.9*N)].t;
-	double rc, dHt0, dHt1;
-	double PXX, PYY;			//Selection probabilities
-	double PXY = 1, PYX = 1;	//Generating probabilities (PXY = PYX for this operator)
-	double TXY, TYX;			//Transition probability
+	long double rc;
+    long double dHt0, dHt1;
+	long double PXX, PYY;			//Selection probabilities
+	long double PXY = 1, PYX = 1;	//Generating probabilities (PXY = PYX for this operator)
+	long double TXY, TYX;			//Transition probability
 
 	long double ZX=0, ZY=0;		//Sum of Boltzmann-weights for current (X) and offspring(Y) populations
 
@@ -199,14 +322,14 @@ void crossover(population &pop, objective_function &obj_fun) {
 		PXX = static_cast<double>( 1 / ((N - 1)*ZX)*(expX(0) + expX(1))); //P((xi,xj) | x)
 		
 		//Now mate the newguys to create offsprings
-		crossoverPoint = uniform_integer(&rng, 1, genomeLength-1);
+		crossoverPoint = uniform_integer( 1, genomeLength-1);
 		//cout << selected.transpose() << " " << pop.newguys[selected(0)].H << endl;
 		for (int i = crossoverPoint; i < genomeLength; i++) {
 			pop.newguys[selected(0)].genome.copy_loci(i, pop.guys[selected(1)].genome(i));
 			pop.newguys[selected(1)].genome.copy_loci(i, pop.guys[selected(0)].genome(i));
 		}
 		for (int i = 0; i < 2; i++) {
-			pop.getFitness(pop.newguys[selected(i)],obj_fun);
+			pop.getFitness(pop.newguys[selected(i)]);
 		}
 
 		expY(0) = exp(-pop.newguys[selected(0)].H / s);
@@ -214,7 +337,7 @@ void crossover(population &pop, objective_function &obj_fun) {
 		for (int i = 0; i < N; i++) {
 			ZY += exp(-pop.newguys[i].H / s);
 		}
-		PYY = static_cast<double>(1 / ((N - 1)*ZY)*(expY(0) + expY(1))); //P((yi,yj) | y) selection probability
+		PYY = static_cast<long double>(1 / ((N - 1)*ZY)*(expY(0) + expY(1))); //P((yi,yj) | y) selection probability
 		dHt0 = (pop.newguys[selected(0)].H - pop.guys[selected(0)].H) / pop.guys[selected(0)].t; //good 
 		dHt1 = (pop.newguys[selected(1)].H - pop.guys[selected(1)].H) / pop.guys[selected(1)].t; //bad 
 
@@ -224,7 +347,7 @@ void crossover(population &pop, objective_function &obj_fun) {
 		rc = exp(-dHt0 - dHt1)*TXY / TYX;
 		//cout << "Selected:	" << selected.transpose()<< "	P: " << rc << " dHt0: " << dHt0 << " dHt1: " << dHt1 << endl;
 		//Accept or reject
-		if (uniform_double(&rng, 0, 1) < fmin(1, rc)) {
+		if (uniform_double_1() < fmin(1, rc)) {
 			pop.newguys[selected(0)].born = pop.generation;
 			pop.newguys[selected(1)].born = pop.generation;
 			pop.copy(pop.guys[selected(0)], pop.newguys[selected(0)]);
@@ -245,18 +368,19 @@ void crossover(population &pop, objective_function &obj_fun) {
 		getchar();*/
 	}
 }
-void crossover_elite(population &pop, objective_function &obj_fun) {
+
+void crossover_elite(population &pop) {
 	//Start roulette selection
 	int matings;
 	int nMatings = (int)(0.2*N);
 	ArrayXi selected(2);
 	int crossoverPoint;
-	double rc, dHt0, dHt1;
-	double PXX, PYY;			//Selection probabilities
-	double PXY = 1, PYX = 1;	//Generating probabilities (PXY = PYX for this operator)
-	double TXY, TYX;			//Transition probability
-	ArrayXd expX(2);
-	ArrayXd expY(2);
+	long double rc, dHt0, dHt1;
+	long double PXX, PYY;			//Selection probabilities
+	long double PXY = 1, PYX = 1;	//Generating probabilities (PXY = PYX for this operator)
+	long double TXY, TYX;			//Transition probability
+    Array<long double, 2,1> expX;
+    Array<long double, 2,1> expY;
 	long double ZX = 0, ZY = 0;
 	double s = 0.5;// pop.guys[(int)(0.9*N)].t;
 	int random_bestguy; //Guy to inject into selected[1]
@@ -264,7 +388,7 @@ void crossover_elite(population &pop, objective_function &obj_fun) {
 		//Selected 0 is a boltzmann "just good" guy. Selected 1 is a random any guy.
 		roulette_select(pop.guys, selected, ZX, s);
 		//Let the newguy selected[1] impersonate a random bestguy but keep the temperature. Then newguy gets superpowers
-		random_bestguy = uniform_integer(&rng, 0, N_best-1);
+		random_bestguy = uniform_integer( 0, N_best-1);
 		pop.copy(pop.newguys[selected(1)], pop.bestguys[random_bestguy]);
 		pop.newguys[selected(1)].born = pop.guys[selected(1)].born;		//Keep date of birth count
 		pop.newguys[selected(1)].t = pop.guys[selected(1)].t;						//Keep temperature
@@ -275,7 +399,7 @@ void crossover_elite(population &pop, objective_function &obj_fun) {
 		PXX = static_cast<double>(1 / ((N - 1)*ZX)*(expX(0) + expX(1))); //P((xi,xj) | x)
 		
 		//Now mate the to create offspring. Let a bestGuy inject DNA in this process!
-		crossoverPoint = uniform_integer(&rng, 1, genomeLength - 1);
+		crossoverPoint = uniform_integer( 1, genomeLength - 1);
 		for (int i = 0; i < genomeLength; i++) {
 			if (i < crossoverPoint) {
 				pop.newguys[selected(0)].genome.copy_loci(i, pop.guys[selected(0)].genome(i));
@@ -290,7 +414,7 @@ void crossover_elite(population &pop, objective_function &obj_fun) {
 		//From now on the newguys are offsprings. The parents are a good guy selected 1 and a bestguy random_bestguy. Adoptive father is guy selected 1
 		
 		for (int i = 0; i < 2; i++) {
-			pop.getFitness(pop.newguys[selected(i)],obj_fun);
+			pop.getFitness(pop.newguys[selected(i)]);
 		}
 
 		expY(0) = exp(-pop.newguys[selected(0)].H / s);
@@ -319,7 +443,7 @@ void crossover_elite(population &pop, objective_function &obj_fun) {
 		rc = exp(-dHt0 - dHt1)*TXY / TYX;
 
 		//Accept or reject
-		if (uniform_double(&rng, 0, 1) < fmin(1, rc)) {
+		if (uniform_double_1() < fmin(1, rc)) {
 			//Keep children.
 			pop.newguys[selected(0)].born = pop.generation;
 			pop.newguys[selected(1)].born = pop.generation;
@@ -335,18 +459,19 @@ void crossover_elite(population &pop, objective_function &obj_fun) {
 	}
 
 }
-void crossover_smartCopy(population &pop, objective_function &obj_fun) {
+
+void crossover_smartCopy(population &pop) {
 	//Start roulette selection																							
 	int matings;
 	int nMatings = (int)(0.2*N);
 	ArrayXi selected(2);
 	double s = 0.5;// pop.guys[(int)(0.9*N)].t;
-	double rc, dHt0, dHt1;
-	double PXX, PYY; //Selection probabilities
-	double PXY, PYX; //Generating probabilities (PXY != PYX for this operator)
-	double TXY, TYX; //Transition probability
-	ArrayXd expX(2);
-	ArrayXd expY(2);
+	long double rc, dHt0, dHt1;
+	long double PXX, PYY; //Selection probabilities
+	long double PXY, PYX; //Generating probabilities (PXY != PYX for this operator)
+	long double TXY, TYX; //Transition probability
+    Array<long double, 2,1> expX;
+    Array<long double, 2,1> expY;
 	ArrayXd n_ab_XY(4); //Exponents for smartCopy probabilities. Note that n_ab.sum() = genomeLength
 	ArrayXd n_ab_YX(4); //Exponents for smartCopy probabilities. Note that n_ab.sum() = genomeLength
 	long double ZX = 0, ZY = 0;
@@ -369,7 +494,7 @@ void crossover_smartCopy(population &pop, objective_function &obj_fun) {
 			PYX *= pow(p_matrix[i], n_ab_YX(i)/genomeLength); //Convert exponent to frequency
 		}
 		for (int i = 0; i < 2; i++) {
-			pop.getFitness(pop.newguys[selected(i)],obj_fun);
+			pop.getFitness(pop.newguys[selected(i)]);
 		}
 		expY(0) = exp(-pop.newguys[selected(0)].H / s);
 		expY(1) = exp(-pop.newguys[selected(1)].H / s);
@@ -394,7 +519,7 @@ void crossover_smartCopy(population &pop, objective_function &obj_fun) {
 		//cout << p_matrix[0] << " " << p_matrix[1] << " " << p_matrix[2] << " " << p_matrix[3] << endl<< endl;
 		rc = exp(-dHt0 - dHt1)*TXY / TYX;
 		//Accept or reject
-		if (uniform_double(&rng, 0, 1) < fmin(1, rc)) {
+		if (uniform_double_1() < fmin(1, rc)) {
 			//Keep Children
 			pop.newguys[selected(0)].born = pop.generation;
 			pop.newguys[selected(1)].born = pop.generation;
@@ -410,7 +535,8 @@ void crossover_smartCopy(population &pop, objective_function &obj_fun) {
 
 	}
 }
-void crossover_snooker(population &pop, objective_function &obj_fun) {
+
+void crossover_snooker(population &pop) {
 	//Perhaps the distribution f(r) can be done with a roulette?
 	//f(r) = exp(H(x+re))/integral_-r_min^r_max exp(H(x+re)) typ?
 
@@ -421,40 +547,38 @@ void crossover_snooker(population &pop, objective_function &obj_fun) {
 	rndChoice(selected.data(), 2, N - 1);
 	// ArrayXd &p0 = pop.guys[selected(0)].genome.parameters; //Reference to guy 0, 
 	// ArrayXd &p1 = pop.guys[selected(1)].genome.parameters; //Reference to guy 1, who is lower on the ladder (better)
-	pop.line.Through(pop.guys[selected(0)].genome.parameters,pop.guys[selected(1)].genome.parameters);
+	pop.line.Through(pop.guys[selected(0)].genome.parameters, pop.guys[selected(1)].genome.parameters);
 	//Distance in terms of r between guys
 	//double distance = pop.line.distance(pop.guys[selected(1)].genome.parameters,pop.guys[selected(0)].genome.parameters);
 	//Vary r to find the walls of the parameter domain
-    double r_max = pop.line.line_max(obj_fun.max_bound);
-    double r_min = pop.line.line_min(obj_fun.min_bound);
-	ArrayXd r_point(r_num);	
+    long double r_max = pop.line.line_max();
+    long double r_min = pop.line.line_min();
+	Array<long double, Dynamic, 1> r_point(r_num);
 	for (int i = 0; i < r_num; i++) {
-		//r_point(i) = uniform_double(&rng, fmin(r_min,r_max), fmax(r_min,r_max));
-		r_point(i) = gaussian_truncated(&rng,		//Create gaussians points centerd around the good performer
-										fmin(r_min, r_max),
-										fmax(r_min, r_max),
+		//r_point(i) = uniform_double( fmin(r_min,r_max), fmax(r_min,r_max));
+		r_point(i) = gaussian_truncated(	//Create gaussians points centerd around the good performer
+										fminl(r_min, r_max),
+										fmaxl(r_min, r_max),
 										1.0,
 										0.3);
 		pop.snookerGuys[i].genome.set_parameters(pop.line.pointAt(r_point(i)));
-		pop.snookerGuys[i].H = obj_fun.fitnessTest(pop.snookerGuys[i]);
+		pop.getFitness(pop.line.pointAt(r_point(i)), pop.snookerGuys[i]);
 		pop.snookerGuys[i].t = pop.guys[selected(0)].t;
 	}
 	//Time to make a roulette to see which "r" is chosenpop.
 
-	ArrayXd roulette(r_num);
-	double lucky_number = uniform_double(&rng, 0, 1);
+	Array<long double, r_num,1> roulette;
+	double lucky_number = uniform_double_1();
 	//Make a roulette wheel
-	double Z = 0;
+	long double Z = 0;
 	for (int i = 0; i < r_num; i++) {
 		Z += exp(-pop.snookerGuys[i].H); //Area on roulette wheel proportional to Boltzmann weights
 		roulette(i) = Z; //Cumulative sum - Low fitness gives large area on roulette
 	}
 
 	roulette /= Z; //Normalize to a proper distribution
-	int chosen = -1;
 	for (int i = 0; i < r_num; i++) {
 		if (lucky_number <= roulette(i)) {
-			chosen = i;
 			pop.guys[selected(0)].genome.set_parameters(pop.snookerGuys[i].genome.parameters); //Copy his shit
 			pop.guys[selected(0)].H 	= pop.snookerGuys[i].H;
 			pop.guys[selected(0)].value = pop.snookerGuys[i].value;
@@ -464,136 +588,5 @@ void crossover_snooker(population &pop, objective_function &obj_fun) {
 	}
 
 }
-void exchange(population &pop) {
-	int i, j, ex; //ex is the exchange iteration
-	double re, dt_inv, dH;
-	for (ex = 0; ex < N; ex++) {
-		i = uniform_integer(&rng, 0, N - 1);										//Chose a guy...
-		j = i == 0 ? 1 : (i== N-1? N-2: i + 2 * uniform_integer(&rng, 0, 1) - 1);	//And a neighbor
-		dH = pop.guys[i].H - pop.guys[j].H;
-		dt_inv = 1 / pop.guys[i].t - 1 / pop.guys[j].t;
-		re = exp(dH*dt_inv);
-		
-		if (uniform_double(&rng, 0, 1) < fmin(1, re)) {
-			//Save the date of birth
-			pop.newguys[j].born = pop.guys[i].born;
-			pop.newguys[i].born = pop.guys[j].born;
-			//Swap the guys on the ladder...
-			pop.copy(pop.guys[i], pop.newguys[j]);
-			pop.copy(pop.guys[j], pop.newguys[i]);
-			//But keep the temperature of position i as t_i,and j as t_j
-			pop.guys[i].t = pop.newguys[i].t;
-			pop.guys[j].t = pop.newguys[j].t;
-			//Now the list of newguys should be updated to be identical to guys
-			pop.copy(pop.newguys[i], pop.guys[i]);
-			pop.copy(pop.newguys[j], pop.guys[j]);
-		}
-	}
-}
-void migration(species &sp) {
-	//First select randomly m out of M pobulations, subject to migration
-	//Then select randomly  n (n=1?) out of N guys to migrate
-	//Accept the new population based on the new population fitness score
-	int n;										//Guy chosen to migrate
-	double dH;									//Probability of migration
 
-	int m = uniform_integer(&rng, 2, M);		//How many populations to migrate
-	ArrayXi s_pop(m);							//Array of sender populations
-	ArrayXi r_pop(m);							//Array of receiving populations
-	rndChoice(s_pop.data(), m, M);				//Fill the array of migrators with m random populations
-	
-	for (int i = 0; i < m; i++) {
-		r_pop(i) = i < m - 1 ? s_pop(i + 1) : s_pop(0) ;						//Define receiving populations cyclically
-		n = uniform_integer(&rng, 0, N-1);									//Who will be the lucky one?
-		sp.copy(sp.pop[r_pop(i)].newguys[n], sp.pop[s_pop(i)].newguys[n]);	//Inject a guy into another population
-		dH = sp.pop[r_pop(i)].newguys[n].H - sp.pop[r_pop(i)].guys[n].H;
-		if (dH < 0 || exp(-dH / sp.pop[r_pop(i)].newguys[n].t) > uniform_double(&rng, 0, 1)) {
-			sp.pop[r_pop(i)].newguys[n].born = sp.count.generation;
-			sp.copy(sp.pop[r_pop(i)].guys[n], sp.pop[r_pop(i)].newguys[n]);
-		}
-		else {
-			//Revert changes in newguys,  i.e sync them for the next round
-			sp.copy(sp.pop[r_pop(i)].newguys[n], sp.pop[r_pop(i)].guys[n]);
-		}
-	}
-	
-}
-void insertguy(population &pop, int from, int to) {
-	int i;
-	//Push out the worst bestguy and move everybody up until "to"
-	for (i = 0; i < to; i++) {
-		pop.copy(pop.bestguys[i], pop.bestguys[i + 1]);
-	}
-	//Insert the exceptional guy into the illustrious group of best guys
-	pop.copy(pop.bestguys[to], pop.guys[from]);
-}
-void find_elite(population &pop) {
-	int i;
-	int count = 0;
-	//int best[N_best];
-	int tried_guys[N_best];
-	double lowest_H;
-	int lowest_i = N;
-	int j = 0;
-	int success = 1;
-	while (success == 1) {
-		lowest_H = 1e10;
-		//Find the best guy yet among guys
-		for (i = 0; i < N; i++) {
-			//Check if i is in skip-list
-			if (isvalueinarray(i, tried_guys, j) == 1) { continue; }
-			if (pop.guys[i].H < lowest_H) {
-				lowest_H = pop.guys[i].H;
-				lowest_i = i;
-			}
-		}
-		count++;
-		//By now we should have a winner, check if he's better than any elite
-		//We have already tried to match j guys, so we can start from j?
-		for (i = 0; i < N_best; i++) {
-			success = 0;
-			if (lowest_H == pop.bestguys[N_best - i - 1].H) {
-				success = 1;
-				tried_guys[j] = lowest_i;
-				j++;
-				return;//The guy is already here! Do not copy, just check next guy
-			}
-			if (lowest_H < pop.bestguys[N_best - i - 1].H) {
-				insertguy(pop, lowest_i, N_best - i - 1);
-				success = 1;
-				tried_guys[j] = lowest_i;
-				j++;
-				break;
-			}
-		}
 
-	}
-}
-void evolve(population &pop, objective_function &obj_fun) {
-	//This function selects either mutation type operators or crossover type. 
-	//Then does an exchange operator, and finally finds the best guys in the population
-	pop.generation++;
-	int dice;
-	//Select mutation or crossover
-	if (uniform_double(&rng, 0, 1) < qm) {
-		if (uniform_double(&rng, 0, 1) < qma) {
-			mutation_elite(pop, obj_fun);
-		}
-		else {
-			mutation(pop, obj_fun);
-		}
-	}
-	else {
-		dice = uniform_integer(&rng, 0, 4);
-		if 		(dice == 0)	 { crossover(pop, obj_fun); }
-		else if (dice == 1)	 { crossover_smartCopy(pop, obj_fun); }
-		else if (dice == 2)	 { crossover_elite(pop, obj_fun); }
-		else				 { crossover_snooker(pop, obj_fun); }
-		
-		
-	}
-
-	exchange(pop);
-	find_elite(pop);
-	
-}

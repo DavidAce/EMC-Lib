@@ -6,64 +6,85 @@
 #include <Eigen/Core>
 #include "personality.hpp"
 #include "objective_function.hpp"
+#include "constants.hpp"
+#include "mymath.hpp"
 using namespace std;
-using namespace constants;
+using namespace EMC_constants;
 using namespace Eigen;
-class inData;		//Forward declaration
-class personality;	//Forward declaration
-//class DNA;			//Forward declaration
+//class inData;		//Forward declaration
 
 class paramLine{
 	private:
-		ArrayXd o;
-		ArrayXd d;
+        objective_function &obj_fun;
+        ArrayXd  o;
+        ArrayXd  d;
 	public:
-		paramLine(): o(nGenes), d(nGenes){}
+		paramLine(objective_function &ref)
+                :obj_fun(ref),
+                 o(nGenes),
+                 d(nGenes){};
 		//Always use "Through" first, to set "o" and "d".
-		void Through(ArrayXd &p1, ArrayXd &p2){ //Points in parameter space p1 and p2
-			for(int i = 0;i < nGenes; i++){
-				o(i) = p1(i);
-				d(i) = p2(i) - p1(i);
+		void Through(Array<long double, Dynamic, 1> &p1, Array<long double, Dynamic, 1>  &p2){ //Points in parameter space p1 and p2
+            ArrayXd p1_temp = p1.cast<double>().array();
+            ArrayXd p2_temp = p2.cast<double>().array();
+            for(int i = 0;i < nGenes; i++){
+				o(i) = p1_temp(i);
+				d(i) = p2_temp(i) - p1_temp(i);
 			}
 		}
-		ArrayXd pointAt(double r){
-			ArrayXd v(nGenes);
+        template<typename type>
+        Array<type,Dynamic,1>  pointAt(const type r){
+            Array<type,Dynamic,1>  v(nGenes);
 			for(int i = 0;i < nGenes; i++){
 				v(i) = o(i)+d(i)*r;
 			}
 			return v;
 		}
-		double distance(ArrayXd &p1, ArrayXd &p2){
-			return sqrt((p2-p1).square().sum());
+		double distance(Array<long double, Dynamic, 1>  &p1, Array<long double, Dynamic, 1>  &p2){
+			return sqrt((p2.cast<double>()-p1.cast<double>()).square().sum());
 		}
-		double line_max(const ArrayXd &Bu ) { //Get the largest r within upper boundary Bu and lower boundary Bl
-			return (Bu - o).cwiseQuotient(d).minCoeff();
+		double line_max() { //Get the largest r within upper boundary Bu and lower boundary Bl
+			return (obj_fun.upper_bound.cast<double>() - o).cwiseQuotient(d).minCoeff();
 		}
-	double line_min(const ArrayXd &Bl) { //Get the largest r within upper boundary Bu and lower boundary Bl
-		return -(Bl - o).cwiseQuotient(-d).minCoeff();
-	}
+	    double line_min() { //Get the largest r within upper boundary Bu and lower boundary Bl
+		    return  (-(obj_fun.lower_bound.cast<double>() - o).cwiseQuotient((-d).eval()).minCoeff());
+	    }
 };
 
 class population{
 private:
-	void wakeUpGuys(objective_function &obj_fun);
-	void wakeUpBest(objective_function &obj_fun);
-	void wakeUpSnookerGuys(objective_function &obj_fun);
-	void getFitness4All(objective_function &obj_fun);
+//	void getFitness(personality& guy);
+	void wakeUpPop ();
+	void wakeUpGuys();
+	void wakeUpBest();
+    void getFitness4All();
+	objective_function &obj_fun;
 public:
-	population() :generation(0) {};
-	void wakeUpPop (objective_function &obj_fun);
-	personality guys[N]; //Make an array of N guys
-	personality newguys[N]; //Make a temporary array of N guinneapigs
-	personality bestguys[N_best]; //Make an array of N/10 good performers
-	personality snookerGuys[r_num];// (r_num, personality(true));//Make an array of r_num snooker guys
-	int generation;				  //Number of generations for this population
-	int population_number;		  //Which number this instance is in a species
-	//ParametrizedLine<double, Dynamic> line; //Line for doing the snooker crossover
-	paramLine line;
-	void copy(personality&, personality&);
-	void copy(DNA&, DNA&);
-	void getFitness(personality&, objective_function&);
+	population(objective_function &ref)
+			:obj_fun        (ref),
+			 guys 	        (N,ref),
+			 newguys        (N,ref),
+			 bestguys       (N_best,ref),
+			 snookerGuys    (r_num,ref),
+             line           (ref),
+			 generation(0){
+        wakeUpPop();
+    };
+    vector<personality> guys; 			     //Make an array of N guys
+	vector<personality> newguys; 			 //Make a temporary array of N guinneapigs
+	vector<personality> bestguys;            //Make an array of N/10 good performers
+	vector<personality> snookerGuys;         // (r_num, personality(true));//Make an array of r_num snooker guys
+
+    paramLine line;	//for doing the snooker crossover
+    int generation;  //Number of generations for this population
+
+    void getFitness(personality &guy);
+    void getFitness(const Array<long double, Dynamic, 1> &point, personality &guy);
+
+    void copy(personality &destination, const personality & source);
+    void copy(DNA& destination, const DNA& source);
+
+
 	int operator()() { //Return the bit at a.
 		return 0;
 	}

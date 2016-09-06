@@ -7,5 +7,5 @@ function ctrl_c() {
         echo "  **  Trapped CTRL-C"
 }
 
-./EMC xy_old.dat xy_new.dat boundaries.dat
+./build/Release/EMC
 echo "Finished Job"
