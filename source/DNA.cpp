@@ -73,53 +73,12 @@ void DNA::copy_loci(const int a, const int bit) {
 }
 
 double DNA::bin2dec(const int i) {
-    auto value = chromosomes[i].begin()._M_p;
-//    auto value = chromosomes[i].to_ulong();
-	return *value / (pow(2.0, geneLength) - 1) * (obj_fun.upper_bound(i) - obj_fun.lower_bound(i)) + obj_fun.lower_bound(i);
+    auto value = chromosomes[i].to_ulong();
+	return value / (pow(2.0, geneLength) - 1) * (obj_fun.upper_bound(i) - obj_fun.lower_bound(i)) + obj_fun.lower_bound(i);
 }
 
-//bitset<geneLength> DNA::dec2bin(const int i) {
-//	double value = parameters(i);
-//	bitset <geneLength> A = (long long unsigned int) ((value - obj_fun.lower_bound(i)) / (obj_fun.upper_bound(i) - obj_fun.lower_bound(i))*(pow(2.0, geneLength) - 1));
-//	return A;
-//}
-
-
-
-vector<bool> DNA::dec2bin(const int i) {
-    long double value = parameters(i);
-    unsigned long long int x = (unsigned long long int)((value - obj_fun.lower_bound(i)) / (obj_fun.upper_bound(i) - obj_fun.lower_bound(i))*(pow(2.0, geneLength) - 1));
-    std::vector<bool> A;
-    for(unsigned int i = 0; i < sizeof(x) * CHAR_BIT; ++i, x >>= 1) {
-        A.push_back(x & 1);
-    }
-    std::reverse(A.begin(), A.end());
-    //Truncate
-    return vector<bool>(A.end() - geneLength, A.end());
-
-
-//    std::string chars( std::bitset< sizeof(long) * CHAR_BIT >( x )
-//                               .to_string( char(0), char(1) ) );
-//    vector<bool> A = std::vector< bool >( chars.begin(), chars.end() );
-//    size_t  nIndex;
-//    for (nIndex = 0; nIndex < A.size (); ++ nIndex) {
-//        cout << A[nIndex];
-//    }
-//    cout<< " nIndex = " << nIndex << endl;
-//    return std::vector< bool >( chars.begin(), chars.end() );
-
-
-//    while(modified_value) {
-//        A.push_back(modified_value & 1);
-//        modified_value >>= 1;
-//    }
-
-
-
-//    vector<bool> A = ((value - obj_fun.lower_bound(i)) / (obj_fun.upper_bound(i) - obj_fun.lower_bound(i))*(pow(2.0, geneLength) - 1));
-
-//    bitset <geneLength> A = (long long unsigned int) ((value - obj_fun.lower_bound(i)) / (obj_fun.upper_bound(i) - obj_fun.lower_bound(i))*(pow(2.0, geneLength) - 1));
-    //return A;
+bitset<maxbits> DNA::dec2bin(const int i) {
+	return bitset <maxbits>( (unsigned long long int)((parameters(i) - obj_fun.lower_bound(i)) / (obj_fun.upper_bound(i) - obj_fun.lower_bound(i))*(pow(2.0, geneLength) - 1)));
 }
 
 
@@ -144,7 +103,7 @@ void DNA::set_parameters(const Array<long double, Dynamic, 1> &p) {
 }
 
 void DNA::randomize_dna(){
-    chromosomes.resize(nGenes);
+    chromosomes.resize((unsigned long)nGenes);
     parameters.resize(nGenes);
     for (int i = 0; i < nGenes; i++) {
         parameters(i) = uniform_double(obj_fun.lower_bound(i), obj_fun.upper_bound(i));
@@ -155,8 +114,7 @@ void DNA::randomize_dna(){
 
 
 DNA::DNA(objective_function &ref):obj_fun(ref) {
-    chromosomes.resize(nGenes);
-    chromosomes.resize(nGenes);
+    chromosomes.resize((unsigned long)nGenes);
 	parameters.resize(nGenes);
 	for (int i = 0; i < nGenes; i++) {
 		parameters(i) = uniform_double(obj_fun.lower_bound(i),obj_fun.upper_bound(i));
@@ -167,6 +125,6 @@ DNA::DNA(objective_function &ref):obj_fun(ref) {
 }
 
 DNA::DNA(objective_function &ref,bool ):obj_fun(ref) {
-    chromosomes.resize(nGenes);
+    chromosomes.resize((unsigned long)nGenes);
     parameters.resize(nGenes);
 }

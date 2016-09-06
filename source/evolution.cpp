@@ -62,8 +62,7 @@ void migration(species &sp) {
     //Accept the new population based on the new population fitness score
     int n;										//Guy chosen to migrate
     long double dH;									//Probability of migration
-
-    int m = uniform_integer( 2, M);		//How many populations to migrate
+    int m = uniform_integer(2, M);		//How many populations to migrate
     ArrayXi s_pop(m);							//Array of sender populations
     ArrayXi r_pop(m);							//Array of receiving populations
     rndChoice(s_pop.data(), m, M);				//Fill the array of migrators with m random populations
@@ -95,10 +94,10 @@ void insertguy(population &pop, int from, int to) {
 }
 
 void find_elite(population &pop) {
+    //Here we attempt to find
     int i;
     int count = 0;
-    //int best[N_best];
-    int tried_guys[N_best];
+    std::set<int> tried_guys;
     long double lowest_H;
     int lowest_i = N;
     int j = 0;
@@ -108,7 +107,7 @@ void find_elite(population &pop) {
         //Find the best guy yet among guys
         for (i = 0; i < N; i++) {
             //Check if i is in skip-list
-            if (isvalueinarray(i, tried_guys, j) == 1) { continue; }
+            if (tried_guys.find(i) != tried_guys.end()) { continue; }
             if (pop.guys[i].H < lowest_H) {
                 lowest_H = pop.guys[i].H;
                 lowest_i = i;
@@ -121,14 +120,14 @@ void find_elite(population &pop) {
             success = 0;
             if (lowest_H == pop.bestguys[N_best - i - 1].H) {
                 success = 1;
-                tried_guys[j] = lowest_i;
+                tried_guys.insert(lowest_i);
                 j++;
-                return;//The guy is already here! Do not copy, just check next guy
+                break;//The guy is already here! Do not copy.
             }
             if (lowest_H < pop.bestguys[N_best - i - 1].H) {
                 insertguy(pop, lowest_i, N_best - i - 1);
                 success = 1;
-                tried_guys[j] = lowest_i;
+                tried_guys.insert(lowest_i);
                 j++;
                 break;
             }
@@ -163,7 +162,7 @@ void roulette_select(vector<personality> &guys, ArrayXi &selected, long double &
 }
 
 
-inline void bitselector_smartCopy(population &pop, ArrayXi &selected, ArrayXd &n_ab_XY, ArrayXd &n_ab_YX) {
+inline void bitselector_smartCopy(population &pop, ArrayXi &selected, ArrayXi &n_ab_XY, ArrayXi &n_ab_YX) {
 	//n_ab_XY(0): n_11 = guys: SAME | newguys: SAME
 	//n_ab_XY(1): n_12 = guys: SAME | newguys: DIFF
 	//n_ab_XY(2): n_21 = guys: DIFF | newguys: SAME
@@ -472,8 +471,8 @@ void crossover_smartCopy(population &pop) {
 	long double TXY, TYX; //Transition probability
     Array<long double, 2,1> expX;
     Array<long double, 2,1> expY;
-	ArrayXd n_ab_XY(4); //Exponents for smartCopy probabilities. Note that n_ab.sum() = genomeLength
-	ArrayXd n_ab_YX(4); //Exponents for smartCopy probabilities. Note that n_ab.sum() = genomeLength
+	ArrayXi n_ab_XY(4); //Exponents for smartCopy probabilities. Note that n_ab.sum() = genomeLength
+	ArrayXi n_ab_YX(4); //Exponents for smartCopy probabilities. Note that n_ab.sum() = genomeLength
 	long double ZX = 0, ZY = 0;
 	for (matings = 0; matings < nMatings; matings++) {
 		n_ab_XY.fill(0);

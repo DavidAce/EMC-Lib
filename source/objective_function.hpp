@@ -38,7 +38,7 @@ public:
     Array<double,Dynamic, Dynamic> lower_bound; //Minimum allowed values for each fitting parameter
     Array<double,Dynamic, Dynamic> upper_bound; //Maximum allowed values for each fitting parameter
     double tolerance;                           //If the fitness saturates within tolerance, the program terminates
-    ArrayXd optimum;
+    Array<long double, Dynamic, 1> optimum;
     int parameters;
     std::vector<Array<double,Dynamic,Dynamic>>  aux; //Auxiliary data or vectors for use in the fitness function
 //    typedef std::function<outputType(objective_function &, inputType &)> fitnessType ;

@@ -22,6 +22,7 @@ void minimize(objective_function & obj_fun){
 	while (sp.count.generation < EMC_constants::max_generations &&  !sp.below_tolerance()) {
 		#pragma omp single nowait
 		{
+
             sp.print_progress();
             sp.store_best_fitness();
 		if (uniform_double_1() < qmig) {
@@ -43,5 +44,5 @@ void minimize(objective_function & obj_fun){
 	//Print timing to console
 	sp.count.simulation_toc = high_resolution_clock::now();
 	printf("Total time:		%.3f seconds\n", std::chrono::duration<double>(sp.count.simulation_toc - sp.count.simulation_tic).count());
-	obj_fun.optimum = sp.pop[sp.champion_number()].bestguys[N_best - 1].genome.parameters.cast<double>() ;
+	obj_fun.optimum = sp.pop[sp.champion_number()].bestguys[N_best - 1].genome.parameters ;
 }

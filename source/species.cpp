@@ -43,7 +43,7 @@ int species::champion_number() {
 void species::store_best_fitness() {
     if (mod(count.generation, store_freq) == 0) {
         if(fitness_history.size() <= count.store_counter) {
-            fitness_history.conservativeResize(2 * count.store_counter);
+            fitness_history.conservativeResize(2 * max(1,count.store_counter));
         }
         long double champ = champion_fitness();
         if (count.store_counter > 0){

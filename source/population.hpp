@@ -4,6 +4,8 @@
 #include <iostream>
 #include <Eigen/Dense>
 #include <Eigen/Core>
+#include <set>
+
 #include "personality.hpp"
 #include "objective_function.hpp"
 #include "constants.hpp"

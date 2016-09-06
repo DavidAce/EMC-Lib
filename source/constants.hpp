@@ -12,12 +12,14 @@ namespace EMC_constants {
 	extern int geneLength;          				//Number of bits per gene (The number of possible values for a parameter is 2^geneLength-1)
 	extern int nGenes;								//Number of parameters in your model. This is set in datafiles.cpp, inData::inData
 	extern int genomeLength;						//Number of bits for all genes, This is set in datafiles.cpp, inData::inData
-	const  int max_generations 	= (int)1e5;			//Number of generations to run the simulation
+    const int maxbits           = 60;
+
+    const  int max_generations 	= (int)1e5;			//Number of generations to run the simulation
 
     const int print_freq        = 100;
 	const int store_freq        = 10;
-    const int check_freq        = 10;
-	const int num_check_history = 200;
+    const int check_freq        = 100;
+	const int num_check_history = 50;
 	const double Tmin 			= 0.0001;			//Minimum temperature of the ladder. Preferrably between close to 1
 	const double Tmax 			= 50;				//Maximum temperature of the ladder. Preferrably around H_max
 	const int seed 				= 8;				//Seed for the random number generator

@@ -21,16 +21,15 @@ using namespace Eigen;
 class DNA {
 private:
 	double bin2dec(const int);
-//	bitset<geneLength> dec2bin(const int);
-	vector<bool> dec2bin(const int);
+	bitset<maxbits> dec2bin(const int);
+
+//	vector<bool> dec2bin(const int);
     objective_function &obj_fun;
 public:
 	DNA (objective_function &ref);
 	DNA (objective_function &ref, bool toggle);
-	vector< vector<bool> > chromosomes;
-//	vector< bitset<geneLength> > chromosomes; //Binary representation
+	vector< bitset<maxbits> > chromosomes; //Binary representation
 	Array<long double, Dynamic,1> parameters;						  //Decimal representation
-
 
 	bool operator== (const DNA& target);
 	int operator()(int); 

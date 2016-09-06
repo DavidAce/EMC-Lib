@@ -2,24 +2,24 @@
 
 using namespace Eigen;
 using namespace std;
-void linspace(ArrayXd & array, double xi, double xf, int n) {
-	int i;
-	double dx, range = xf - xi;
-	dx = range / (n - 1);
-	array(0) = xi;
-	for (i = 1; i < n; i++) {
-		array(i) = array(i - 1) + dx;
-	}
-}
-void logspace(ArrayXd & array, double xi, double xf, int n) {
+//void linspace(ArrayXd & array, double xi, double xf, int n) {
+//	int i;
+//	double dx, range = xf - xi;
+//	dx = range / (n - 1);
+//	array(0) = xi;
+//	for (i = 1; i < n; i++) {
+//		array(i) = array(i - 1) + dx;
+//	}
+//}
+ArrayXd LogSpaced(int n, double xi, double xf) {
 	int i;
 	double s = log(xi);
 	double f = log(xf);
-	linspace(array, s, f, n);
+	ArrayXd arr = ArrayXd::LinSpaced(n,s,f);
 	for (i = 0; i < n; i++) {
-		array(i) = exp(array(i));
-		//array[i] = pow(10, array[i]);
+		arr(i) = exp(arr(i));
 	}
+	return arr;
 }
 int get_sign(double value)
 {
@@ -70,14 +70,7 @@ int mod(int a, int b) {
 	return ret;
 
 }
-int isvalueinarray(int val, int *arr, int size) {
-	int i;
-	for (i = 0; i < size; i++) {
-		if (arr[i] == val)
-			return 1;
-	}
-	return 0;
-}
+
 int heaviside(double x) {
 	if (x > 0) {
 		return 1;
