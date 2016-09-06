@@ -13,13 +13,14 @@ using namespace Eigen;
 class objective_function{
 private:
 public:
-    template <typename boundaryType, typename... aux_args>
-    objective_function(boundaryType lower, boundaryType upper, double tol,aux_args... in)
+    template <typename func_type,typename boundaryType, typename... aux_args>
+    objective_function(func_type func, boundaryType lower, boundaryType upper, double tol,aux_args... in)
             : lower_bound(lower),
               upper_bound(upper),
               tolerance(tol),
               aux({in...})
     {
+        provided_function = func;
         parameters = (int) lower_bound.size();
 
     };

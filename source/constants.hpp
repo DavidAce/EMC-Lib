@@ -17,7 +17,7 @@ namespace EMC_constants {
     const int print_freq        = 100;
 	const int store_freq        = 10;
     const int check_freq        = 10;
-	const int num_check_history = 50;
+	const int num_check_history = 200;
 	const double Tmin 			= 0.0001;			//Minimum temperature of the ladder. Preferrably between close to 1
 	const double Tmax 			= 50;				//Maximum temperature of the ladder. Preferrably around H_max
 	const int seed 				= 8;				//Seed for the random number generator

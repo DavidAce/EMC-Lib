@@ -1,4 +1,4 @@
-# Evolutionary Monte Carlo (EMC)
+# Evolutionary Monte Carlo  (beta)
 This program finds the global minimum in a general parameter
 space by combining Genetic algorithms and Monte Carlo 
 algorithms. 
@@ -11,98 +11,63 @@ References:
 
 [Real-parameter evolutionary Monte Carlo with applications to Bayesian mixture models](http://users.phhp.ufl.edu/faliang/papers/2001/RealEMC.pdf)
 
+
+The program minimizes problems of any dimension and in general performs well despite rough energy landscapes. Problems 1-3 dimensions usually
+take under 1 second while 3-6 dimensions may take tens of seconds. Around 10 dimensions takes roughly a minute.
+
 ## Quick Start
-From a Linux terminal type
+From a Linux terminal, go to the root folder where `example_main.cpp` is and run
 
-		make
-		./EMC xy_old.dat xy_new.dat boundaries.dat
-                		
+		./build.sh
+to build (compile) the project. To run the program, type
+    		
+    	./run.sh	
 
+
+## Prerequisites
+##### c++14
+A c++ compiler with support for the flag `-std=c++14`.
+
+##### Eigen
+The Eigen math library has to be installed and found in PATH environement variable. 
+Please download and install from
+
+        http://eigen.tuxfamily.org/
+        
+##### OpenMP
+Support for the compiler flag `-fopenmp`, used to parallelize the algorithm.
+
+
+        
 ## Usage
-The files `source/minimization.hpp` and `source/minimization.cpp`
-have the function `fitnessTest()` which is used to map an n-dimensional
-point in your parameter space, called a *chromosome*,
-to scalar `H`, called the *fitness* (or energy). You will have to re-write this 
-function to suit your minimizing needs. Since this function is called **many**
-times it is important to write fast code. Do **not** use OpenMP as it is
-already used on the outer loop that calls `fitnessTest()`.
+See the example_main.cpp file for syntax details. In principle it is enough to include 
+the header `source/EMC.h` from your own project to gain access to the class object `objective_function`
+which has to be initialized and then passed to the function `minimize()`. The constructor of class object `objective_function`
+takes arguments:
 
-Ideally you should aim for H to be small, no larger than 50, say, since differences
-in H are present in many Boltzmann weight exponentials, as in `exp((H_new - H_old)/T)`.
-
-If H can become very large, I suggest you leave the function that is already present:
-
-        	H = -1 / log(H + log_param) + log_const + pow(log( 1/(H + 1)), 2);
-
-which basically gives your parameter hypersurface a good shape for the minimization process.
-
-### The default program
-If you compile and run the program *as is*, it will try to find
-the 12 coefficients of a bivariate polynomial that maps the coordinates
-in `indata/xy_old.dat` into `indata/xy_new.dat`. This type of problem is 
-found in cartography when one needs a recipe that stretches one
-geographical map into another, that may come from a different projection.
-All coefficients should approximate the value `2` if the program is working correctly.
-
-## Compilation 
-In a linux terminal, enter `make` to generate the binary `EMC`. 
-Enter `make clean ` to clean old object files.
-The program has been tested with g++ version 5.3.0, 
-but should work with anything later than g++ 4.9.
-
-
-## Excecution  
-Enter `./EMC file0 file1 ... fileN` to execute the 
-binary EMC with your own input files listed.
-Put your input files in a folder "./indata/".
-The file run.sh is a bash script for execution.
+        objective_function obj_fun(my_function, lower_bound, upper_bound, tolerance, aux_data1, aux_data2   ... aux_dataN);
  
-                
-All files are optional, except the one containing the
-boundaries of your parameter space, which is
-mandatory. See format below. This file must be the last
-on the argument list.
-Optional files may be used for computation of the fitness.
-                
-##### Example
-        ./EMC my_file1.dat my_file2.dat boundaries.dat
+where `lower_bound` and `upper_bound` are Eigen arrays of type Eigen::ArrayXd(n), where n is the number of parameters you wish to minimize, i.e.,
+one lower and upper boundary per parameter. The argument `tolerance` has type `double` and tells the program when
+to finish: a small value (say 1e-16) takes longer than a large value (`say 1e-8`) but gives better accuracy. You can
+provide as many `aux_data` objects as you wish as long as they are of type `Eigen::ArrayXd` or `Eigen::ArrayXXd`. These
+can be used to actually compute your minimizing function and are available as members of the `objective_function` class, like `obj_fun.aux[0]`, `obj_fun.aux[1]`... `obj_fun.aux[N]`.
 
-                 
-                
-## File format
-Files can contain tab-delimited matrices of size n x m
-(n = rows, m = columns).
-A matrix from `file0` is accessible from within the 
-program as  `in.data[0]`  , which is a pointer to
-an Eigen-type matrix, MatrixXd.
-    
-##### Example
-To get element in row 2 and column 5 from 
-`file1`, you may write:
-                
-        double my_number = in.data[1](2,5);
-                       
-See the Quick Reference to Eigen syntax here:
-https://eigen.tuxfamily.org/dox-devel/AsciiQuickReference.txt
+Lastly, `my_function` is a pointer to a function of return type `long double`, declared as:
 
+        long double my_function(objective_function &obj_fun, Eigen::Array<long double, Dynamic, 1> &inputParameters);
 
-The last argument `fileN` must always contain the domain
-boundary in two columns. The first column is the lower 
-bound, and the second is the upper bound.
-There must be as many rows as parameters for the fit!
+In its definition, you will have to write a function body that maps `inputParameters` (and optionally `obj_fun.aux[]`) into
+a real scalar value like an "Fitness" (or "Energy") that you wish to minimize.
+        
 
-##### Example 
-If parameters `sigma`, `mu`, `rho` are to be minimized
-in a 3D cube parameter space with volume `64`, centered at origo,
-then boundaries.dat may contain (tab delimited):
-                        
-                -2  2
-                -2  2
-                -2  2
+### The Example program
+If you compile and run the program *as is*, it will try to find
+the minimum of the paraboloid `f(x,y) = sqrt(x^2 + y^2)` with solution `(0,0)`. 
 
 
 ## Constants
-See the file `EMC_constants.h`. In particular, set the following
+See the file `constants.hpp`. In particular, set the following
 variables to your liking: 
 
 `int M` sets the number of parallel subpopulations. Preferrably this
@@ -110,11 +75,6 @@ number should be the same as the number cpu-threads available for OpenMP.
 (Usually 4 to 8, depending on your cpu).
 
 
-
-`int generations` controls the maximum duration
-of the simulation (default `500000`). 
-
-`double lowest_H` sets threshold for the lowest fitness. If
-any fitness is lower than `lowest_H` the program will terminate.
-
+`int max_generations` controls the maximum duration
+of the simulation (default `50000`). 
 
