@@ -22,11 +22,11 @@ int main(){
     exampleData1 << 3,2,1;
 
     //Mandatory arrays!
-    Eigen::ArrayXd lower_bound(8);
-    Eigen::ArrayXd upper_bound(8);
+    Eigen::ArrayXd lower_bound(2);
+    Eigen::ArrayXd upper_bound(2);
 
-    lower_bound << -10, -10,  -10, -10, -10 ,-10, -10,  -10;
-    upper_bound <<  10, 10,10, 10, 10 ,10, 10,10;
+    lower_bound << -10, -10;
+    upper_bound <<  10, 10;
     //The program terminates once the fitness does not improve beyond this tolerance
     double tolerance = 1e-16;
 
