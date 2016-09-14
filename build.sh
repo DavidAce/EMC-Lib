@@ -1,17 +1,25 @@
 #!/bin/bash
-echo "Starting Build"
-mkdir build
-cd build
+
 #rm -rf *
 buildtype="Release"
-if [[ $# -eq 1 ]] ; then
-	echo "Argument supplied: " $1
-	buildtype=$1
+
+if [[ "$@" == *"ebug"* ]]
+then
+	buildtype="Debug"
 fi
+
+if [[ "$@" == *"lean"* ]]
+then
+    echo "Cleaning build"
+	rm -rf build
+    exit 0
+fi
+
+
+mkdir build
+cd build
 mkdir ${buildtype}
 cd ${buildtype}
-cmake -DCMAKE_BUILD_TYPE=${buildtype} ../../
+echo "Starting Build"
+cmake -DCMAKE_BUILD_TYPE=${buildtype}  ../../
 make
-
-
-
