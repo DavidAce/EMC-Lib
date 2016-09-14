@@ -131,4 +131,3 @@ void species::copy(personality &destination, personality &source) {
 	destination.genome.chromosomes = source.genome.chromosomes;
 }
 
-

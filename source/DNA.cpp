@@ -18,6 +18,7 @@ std::ostream &operator<<(std::ostream &os, DNA const &genome) {
 	return os;
 }
 
+
 bool DNA::operator==(const DNA &target) { //Compare DNA and return true if equal
 	bool isequal = true;
 	for (int i = 0; i < EMC_constants::nGenes; i++) {
@@ -89,6 +90,7 @@ void DNA::set_parameter(const int i, const long double p) {
 }
 				
 void DNA::update_parameters() {
+//    cout << "Updating " << nGenes << " genes with " << parameters.transpose()  <<endl;
 	for (int i = 0; i < nGenes; i++) {
 		parameters(i) = bin2dec(i);
 	}
@@ -109,20 +111,11 @@ void DNA::randomize_dna(){
         parameters(i) = uniform_double(obj_fun.lower_bound(i), obj_fun.upper_bound(i));
         chromosomes[i] = dec2bin(i);
     }
+    cout << "Randomize oK" << endl;
 }
 
 
 
-DNA::DNA(objective_function &ref):obj_fun(ref) {
-    chromosomes.resize((unsigned long)nGenes);
-	parameters.resize(nGenes);
-	for (int i = 0; i < nGenes; i++) {
-		parameters(i) = uniform_double(obj_fun.lower_bound(i),obj_fun.upper_bound(i));
-		chromosomes[i] = dec2bin(i);
-
-	}
-
-}
 
 DNA::DNA(objective_function &ref,bool ):obj_fun(ref) {
     chromosomes.resize((unsigned long)nGenes);

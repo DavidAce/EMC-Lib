@@ -51,7 +51,7 @@ public:
     void store_best_fitness();
     bool below_tolerance();
     void print_progress();
-    void print_progress(bool);
+	void print_progress(bool);
 	void copy(personality &, personality &);
 };
 

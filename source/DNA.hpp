@@ -25,11 +25,21 @@ private:
 
 //	vector<bool> dec2bin(const int);
     objective_function &obj_fun;
+    void randomize_dna();
+//    Array<long double, Dynamic,1>   random_parameters();
+//    vector< bitset<maxbits> >       random_chromosomes();
+
+
+
 public:
-	DNA (objective_function &ref);
-	DNA (objective_function &ref, bool toggle);
-	vector< bitset<maxbits> > chromosomes; //Binary representation
-	Array<long double, Dynamic,1> parameters;						  //Decimal representation
+    DNA(objective_function &ref):obj_fun(ref)
+	{
+        randomize_dna();
+    }
+
+    DNA (objective_function &ref, bool toggle);
+    Array<long double, Dynamic,1> parameters;						  //Decimal representation
+    vector< bitset<maxbits> > chromosomes; //Binary representation
 
 	bool operator== (const DNA& target);
 	int operator()(int); 
@@ -41,7 +51,6 @@ public:
 	void set_parameter(const int,const long double);
 	void set_parameters(const Array<long double, Dynamic, 1>  &p);
 	void update_parameters();
-    void randomize_dna();
-}; 
+};
 
 #endif
