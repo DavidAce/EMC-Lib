@@ -10,7 +10,14 @@ void minimize(objective_function & obj_fun){
     EMC_constants::nGenes 	   	= obj_fun.parameters;
     EMC_constants::geneLength   = 2+min(58,(int)ceil(-log(obj_fun.tolerance)/log(2)));
     EMC_constants::genomeLength = EMC_constants::nGenes * EMC_constants::geneLength;
-	omp_set_num_threads(EMC_constants::M);
+	if (obj_fun.threads >= 0){
+        EMC_constants::M = obj_fun.threads;
+        omp_set_num_threads(obj_fun.threads);
+    }else{
+        EMC_constants::M = omp_get_num_threads();
+    }
+    cout << "OpenMP Threads: " << EMC_constants::M<< endl;
+
     Eigen::initParallel();
     species sp(obj_fun);
 
@@ -26,9 +33,11 @@ void minimize(objective_function & obj_fun){
 
             sp.print_progress();
             sp.store_best_fitness();
-		if (uniform_double_1() < qmig) {
-			migration(sp);
-		}
+        if (EMC_constants::M > 1) {
+            if (uniform_double_1() < qmig) {
+                migration(sp);
+            }
+        }
 		}
 		#pragma omp for nowait
 		for (int i = 0; i < M; i++) {

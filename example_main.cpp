@@ -34,7 +34,8 @@ int main(){
     //and then any number of auxiliary double arrays (ArrayXd or ArrayXXd) of any size.
     //These can be accessed from obj_fun.aux[0], obj_fun.aux[1] ... etc, in the same order as given
     objective_function obj_fun(my_example_function,lower_bound, upper_bound,tolerance ,exampleData0,exampleData1);
-
+    obj_fun.id = 0;
+    obj_fun.threads = 1;
     //Next we pass a function to minimize.
     // Its output is a double (the fitness)
     // Its input  is a reference objective_function &obj_fun, and an ArrayXd &parameters with  fitting parameters
