@@ -77,7 +77,7 @@ endforeach()
 list(REMOVE_DUPLICATES EMC_INCLUDE_DIRS)
 
 include_directories(${EMC_INCLUDE_DIRS})
-add_executable (EMC example_main.cpp ${EMC_SOURCES} ${EMC_SOURCES})
+add_executable (EMC example_main.cpp ${EMC_SOURCES} ${EMC_SOURCES} EMC.h)
 
 
 #file(GLOB SOURCES "source/*.cpp")

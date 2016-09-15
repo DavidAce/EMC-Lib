@@ -2,7 +2,7 @@
 // Created by david on 9/2/16.
 //
 
-#include "source/EMC.h"
+#include "EMC.h"
 
 
 long double my_example_function(objective_function &obj_fun, Eigen::Array<long double, Dynamic, 1> &inputParameters){
