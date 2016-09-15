@@ -17,7 +17,7 @@ namespace EMC_constants {
     const  int max_generations 	= (int)1e5;			//Number of generations to run the simulation
 
     const int print_freq        = 500;
-	const int store_freq        = 5;
+	const int store_freq        = 10;
     const int check_freq        = 10;
 	const int num_check_history = 10;
 	const double Tmin 			= 0.0001;			//Minimum temperature of the ladder. Preferrably between close to 1
