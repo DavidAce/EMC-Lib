@@ -82,7 +82,7 @@ add_executable (EMC example_main.cpp ${EMC_SOURCES} ${EMC_SOURCES} EMC.h)
 
 #file(GLOB SOURCES "source/*.cpp")
 #
-#add_executable(EMC ${SOURCES} example_main.cpp source/EMC.h source/constants.cpp source/objective_function.hpp source/objective_function.cpp)
+#add_executable(EMC ${SOURCES} example_main.cpp source/EMC.h source/constants.cpp source/objective_function.hpp)
 
 #target_compile_options(EMC PUBLIC -std=c++14 -fopenmp -Wall -Wfloat-conversion -O3 -march=native -mno-avx -Wno-deprecated-declarations -DEIGEN_NO_DEBUG -DNDEBUG)
 

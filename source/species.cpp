@@ -92,7 +92,8 @@ void species::print_progress(){
 	if (mod(count.generation, print_freq) == 0) {
         IOFormat fmt(19, 0, "  ", "  ", "", "", "", "");
         cout << fixed << setprecision(19);
-		cout << "Generation... " << setw(7) << count.generation << " | Current Best: ";
+        if (obj_fun.id >= 0){cout << "ID: " << obj_fun.id << " ";}
+        cout << "Generation... " << setw(7) << count.generation << " | Current Best: ";
         cout << champion_value().transpose().eval().format(fmt) << "   | H = ";
         cout << setw(22)  << champion_fitness() << " | " << " diff: ";
 		cout << setw(22)  << latest_history_diff();
@@ -105,6 +106,7 @@ void species::print_progress(){
 void species::print_progress(bool){
     IOFormat fmt(19, 0, "  ", "  ", "", "", "", "");
     cout << fixed << setprecision(19);
+    if (obj_fun.id >= 0){cout << "ID: " << obj_fun.id << " ";}
     cout << "Generation... " << setw(7) << count.generation << " | Current Best: ";
     cout << champion_value().transpose().eval().format(fmt) << "   | H = ";
     cout << setw(22)  << champion_fitness() << " | " << " diff: ";

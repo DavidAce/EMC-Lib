@@ -22,6 +22,7 @@ public:
     {
         provided_function = func;
         parameters = (int) lower_bound.size();
+        id = -1;
 
     };
     typedef std::function<double(objective_function &, Array<long double, Dynamic, 1> &)> providedType ;
@@ -34,7 +35,7 @@ public:
 
     }
 
-
+    int id; //An id for use in parallel (MPI) computations, when this lib is used elsewhere.
     Array<double,Dynamic, Dynamic> lower_bound; //Minimum allowed values for each fitting parameter
     Array<double,Dynamic, Dynamic> upper_bound; //Maximum allowed values for each fitting parameter
     double tolerance;                           //If the fitness saturates within tolerance, the program terminates
