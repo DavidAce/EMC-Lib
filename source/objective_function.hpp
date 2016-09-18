@@ -30,9 +30,11 @@ public:
     providedType provided_function;
 
     long double fitness(Array<long double, Dynamic, 1>  &parameters){
-//        long double H = provided_function(*this, parameters);
-//        return (long double)(-1.0 / log(H + EMC_constants::log_param) + EMC_constants::log_const + pow(log( 1/(H + 1)), 2));
-        return provided_function(*this, parameters);
+        long double H = provided_function(*this, parameters);
+        if (isinf(H)){H = 1e20;}
+        if (isnan(H)){H = 1e20;}
+        return (long double)(-1.0 / log(H + EMC_constants::log_param) + EMC_constants::log_const + pow(log( 1/(H + 1)), 2));
+//        return provided_function(*this, parameters);
 
     }
 
