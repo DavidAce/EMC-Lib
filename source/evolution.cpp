@@ -296,7 +296,6 @@ void mutation_elite(population &pop) {
 }
 
 void crossover(population &pop) {
-	int  matings;
 	int nMatings = (int)(0.2*N);
 	ArrayXi selected(2);
     Array<long double, 2,1> expX;
@@ -313,7 +312,7 @@ void crossover(population &pop) {
 
 	long double ZX=0, ZY=0;		//Sum of Boltzmann-weights for current (X) and offspring(Y) populations
 
-	for (matings = 0; matings < nMatings; matings++) {
+	for (int matings = 0; matings < nMatings; matings++) {
 		roulette_select(pop.guys, selected, ZX, s); //Selected 0 will be good, selected 1 random
 
 		expX(0) = exp(-pop.guys[selected(0)].H / s); //good guy

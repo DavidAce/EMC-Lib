@@ -24,7 +24,6 @@ void minimize(objective_function & obj_fun){
     rng.seed(EMC_constants::seed);
 	//Start algorithm
 	sp.count.simulation_tic = high_resolution_clock::now();
-	// sp.count.evolution_tic = clock();				//Start timer
 	#pragma omp parallel
     rng.seed(EMC_constants::seed + (unsigned long)omp_get_thread_num());
 	while (sp.count.generation < EMC_constants::max_generations &&  !sp.below_tolerance()) {
