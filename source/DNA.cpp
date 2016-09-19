@@ -91,9 +91,12 @@ void DNA::set_parameter(const int i, const long double p) {
 
 void DNA::update_parameters() {
 //    cout << "Updating " << nGenes << " genes with " << parameters.transpose()  <<endl;
+//    cout << "Old parameters = " << parameters.transpose() << " ";
     for (int i = 0; i < nGenes; i++) {
         parameters(i) = bin2dec(i);
     }
+//    cout << "New parameters = " << parameters.transpose() << endl;
+
 }
 
 void DNA::set_parameters(const Array<long double, Dynamic, 1> &p) {

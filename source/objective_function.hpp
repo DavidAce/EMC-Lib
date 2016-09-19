@@ -23,6 +23,7 @@ public:
         provided_function = func;
         parameters = (int) lower_bound.size();
         id = -1;
+        name = "";
         threads = -1;
 
     };
@@ -38,6 +39,7 @@ public:
     }
 
     int id; // Optional: An id for use in parallel (MPI) computations, when this lib is used elsewhere.
+    string name;
     int threads; //Optional: Specify number of threads;
     Array<double,Dynamic, Dynamic> lower_bound; //Minimum allowed values for each fitting parameter
     Array<double,Dynamic, Dynamic> upper_bound; //Maximum allowed values for each fitting parameter

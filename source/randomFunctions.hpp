@@ -44,7 +44,6 @@ namespace EMC_rnd{
                 return number;
             }
         }
-
     }
 };
 

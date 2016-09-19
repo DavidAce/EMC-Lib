@@ -92,7 +92,7 @@ void species::print_progress(){
 	if (mod(count.generation, print_freq) == 0) {
         IOFormat fmt(19, 0, "  ", "  ", "", "", "", "");
         cout << fixed << setprecision(19);
-        if (obj_fun.id >= 0){cout << "ID: " << obj_fun.id << " ";}
+        if (obj_fun.id >= 0){cout << "ID: " << obj_fun.id << " "<< obj_fun.name << " ";}
         cout << "Generation... " << setw(7) << count.generation << " | Current Best: ";
         cout << champion_value().transpose().eval().format(fmt) << "   | H = ";
         cout << setw(22)  << champion_fitness() << " | " << " diff: ";
@@ -106,7 +106,7 @@ void species::print_progress(){
 void species::print_progress(bool){
     IOFormat fmt(19, 0, "  ", "  ", "", "", "", "");
     cout << fixed << setprecision(19);
-    if (obj_fun.id >= 0){cout << "ID: " << obj_fun.id << " ";}
+    if (obj_fun.id >= 0){cout << "ID: " << obj_fun.id << " " << obj_fun.name << " ";}
     cout << "Generation... " << setw(7) << count.generation << " | Current Best: ";
     cout << champion_value().transpose().eval().format(fmt) << "   | H = ";
     cout << setw(22)  << champion_fitness() << " | " << " diff: ";
@@ -129,7 +129,6 @@ void species::copy(personality &destination, personality &source) {
 	destination.H = source.H;
 	destination.t = source.t;
 	destination.genome.parameters = source.genome.parameters;
-	destination.value = source.value;
 	destination.genome.chromosomes = source.genome.chromosomes;
 }
 

@@ -10,13 +10,14 @@ void minimize(objective_function & obj_fun){
     EMC_constants::nGenes 	   	= obj_fun.parameters;
     EMC_constants::geneLength   = 2+min(58,(int)ceil(-log(obj_fun.tolerance)/log(2)));
     EMC_constants::genomeLength = EMC_constants::nGenes * EMC_constants::geneLength;
-	if (obj_fun.threads >= 0){
+    omp_set_dynamic(0);     // Explicitly disable dynamic teams
+    if (obj_fun.threads >= 0){
         EMC_constants::M = obj_fun.threads;
         omp_set_num_threads(obj_fun.threads);
     }else{
-        EMC_constants::M = omp_get_num_threads();
+        EMC_constants::M = 1;
+        omp_set_num_threads(1);
     }
-    cout << "OpenMP Threads: " << EMC_constants::M<< endl;
 
     Eigen::initParallel();
     species sp(obj_fun);
@@ -24,14 +25,17 @@ void minimize(objective_function & obj_fun){
     rng.seed(EMC_constants::seed);
 	//Start algorithm
 	sp.count.simulation_tic = high_resolution_clock::now();
-	#pragma omp parallel
     rng.seed(EMC_constants::seed + (unsigned long)omp_get_thread_num());
-	while (sp.count.generation < EMC_constants::max_generations &&  !sp.below_tolerance()) {
+    cout << "OpenMP Threads: " << EMC_constants::M << endl;
+    #pragma omp parallel num_threads(EMC_constants::M)
+    while (sp.count.generation < EMC_constants::max_generations &&  !sp.below_tolerance()) {
 		#pragma omp single nowait
-		{
-
+        {
             sp.print_progress();
             sp.store_best_fitness();
+        }
+        #pragma omp single nowait
+        {
         if (EMC_constants::M > 1) {
             if (uniform_double_1() < qmig) {
                 migration(sp);
@@ -40,15 +44,13 @@ void minimize(objective_function & obj_fun){
 		}
 		#pragma omp for nowait
 		for (int i = 0; i < M; i++) {
-			evolve(sp.pop[i]); 			//Evolve all the populations
+//            cout << "OpenMP Threads: " << omp_get_num_threads() << " Populations: " << EMC_constants::M << endl;
+            evolve(sp.pop[i]); 			//Evolve all the populations
 		}
-		
-
-		
 	}
 	//Print final parameters
     sp.print_progress(true);
-    if (obj_fun.id >= 0){cout << "ID: " << obj_fun.id << " ";}
+    if (obj_fun.id >= 0){cout << "ID: " << obj_fun.id << " "<< obj_fun.name << " ";}
     cout << "Best Parameters: "
 		 << sp.pop[sp.champion_number()].bestguys[N_best - 1].genome.parameters.transpose() <<"     | " ;
 	//Print timing to console

@@ -50,7 +50,7 @@ class paramLine{
 			return (obj_fun.upper_bound.cast<double>() - o).cwiseQuotient(d).minCoeff();
 		}
 	    double line_min() { //Get the largest r within upper boundary Bu and lower boundary Bl
-		    return  (-(obj_fun.lower_bound.cast<double>() - o).cwiseQuotient((-d).eval()).minCoeff());
+		    return  -(obj_fun.lower_bound.cast<double>() - o).cwiseQuotient((-d).eval()).minCoeff();
 	    }
 };
 

@@ -59,16 +59,17 @@ void population::wakeUpGuys() {
 
 
 void population::wakeUpBest() {
-	int i;
-	int j = 0;
 //	ArrayXi copied_guys(N_best);
-    std::set<int> copied_guys;
-	long double lowest_H;
-	int lowest_i = 0; //The position i on the temperature ladder of the guy with lowest H
-    while (copied_guys.size() < N_best) {
-        lowest_H = 1e10;
+    std::set<unsigned long int> copied_guys;
+    int j = 0;
+
+    long double  lowest_H;
+	unsigned int lowest_i; //The position i on the temperature ladder of the guy with lowest H
+    while (copied_guys.size() < N_best && j < N_best) {
+        lowest_H = guys[0].H;
+        lowest_i = 0;
         //Find the best guy yet among guys
-        for (i = 0; i < N; i++) {
+        for (unsigned int i = 0; i < N; i++) {
             //Check if i is in skip-list
             if (copied_guys.find(i) != copied_guys.end()){continue;}
             if (guys[i].H < lowest_H) {
@@ -80,8 +81,8 @@ void population::wakeUpBest() {
         copy(bestguys[N_best - j - 1], guys[lowest_i]);
         copied_guys.insert(lowest_i);
         j++;
-
     }
+
 }
 
 
@@ -90,7 +91,6 @@ void population::copy(personality &destination, const personality &source) {
 	destination.H					= source.H;
 	destination.t					= source.t;
 	destination.genome.parameters	= source.genome.parameters;
-	destination.value				= source.value;
 	destination.genome.chromosomes  = source.genome.chromosomes;
 
 	// std::copy(destination.genome.chromosomes, destination.genome.chromosomes + nGenes, source.genome.chromosomes);

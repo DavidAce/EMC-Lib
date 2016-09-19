@@ -33,8 +33,7 @@ public:
             born(0),
             genome(ref,toggle) {
 	};
-	double t; 							//temperature
-	long double value;				//Actual fitting-value
+	long double t; 							//temperature
 	int born;							//Generation when DNA first emerged
 	DNA genome;							//Contains binary and real representation of parameters
 	long double H;					//Fitness, or energy
