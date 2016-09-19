@@ -6,7 +6,7 @@
 
 
 long double my_example_function(objective_function &obj_fun, Eigen::Array<long double, Dynamic, 1> &inputParameters){
-    return sqrt(inputParameters.cwiseAbs2().sum()) + obj_fun.aux[0].sum() - obj_fun.aux[1].sum(); //Minimum at 0
+    return sqrt(inputParameters.cwiseAbs2().sum()) + obj_fun.aux[0].sum() - obj_fun.aux[1].sum() +1e18; //Minimum at 0
 };
 
 
