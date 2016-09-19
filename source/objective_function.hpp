@@ -22,6 +22,8 @@ public:
     {
         provided_function = func;
         parameters = (int) lower_bound.size();
+        id = -1;
+        threads = -1;
 
     };
     typedef std::function<double(objective_function &, Array<long double, Dynamic, 1> &)> providedType ;
@@ -29,12 +31,14 @@ public:
 
     long double fitness(Array<long double, Dynamic, 1>  &parameters){
 //        long double H = provided_function(*this, parameters);
+//        if (isinf(H)){H = 1e20;}
+//        if (isnan(H)){H = 1e20;}
 //        return (long double)(-1.0 / log(H + EMC_constants::log_param) + EMC_constants::log_const + pow(log( 1/(H + 1)), 2));
         return provided_function(*this, parameters);
-
     }
 
-
+    int id; // Optional: An id for use in parallel (MPI) computations, when this lib is used elsewhere.
+    int threads; //Optional: Specify number of threads;
     Array<double,Dynamic, Dynamic> lower_bound; //Minimum allowed values for each fitting parameter
     Array<double,Dynamic, Dynamic> upper_bound; //Maximum allowed values for each fitting parameter
     double tolerance;                           //If the fitness saturates within tolerance, the program terminates
