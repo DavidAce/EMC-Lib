@@ -168,8 +168,8 @@ void find_elite(population &pop) {
 void roulette_select(const vector<personality> &guys, Array2i &selected, long double &Z, long double lowest_H) {
 	//Selected 0 is the guy with good fitness (lowest), selected 1 is random
 
-	//double total_H = 0;
 	Array<long double, N, 1> roulette;
+
 	long double lucky_number;
 	//Make a roulette wheel
     //Start by finding the best guy in the list
@@ -177,7 +177,17 @@ void roulette_select(const vector<personality> &guys, Array2i &selected, long do
 	for (int i = 0; i < N; i++) {
 		Z += exp(-(guys[i].H - lowest_H));
 		roulette(i) = Z; //Cumulative sum - Low fitness gives large area on roulette
+//        allZ(i) = exp(-(guys[i].H - lowest_H));
+//        allH(i) = (guys[i].H - lowest_H);
+//        allt(i) = (guys[i].t);
 	}
+//    #pragma omp critical
+//    {
+//        cout << lowest_H << endl;
+//        cout << allH.transpose() << endl;
+//        cout << allt.transpose() << endl;
+//        cout << allZ.transpose() << endl << endl;
+//    }
 	lucky_number = uniform_double( (long double) 0.0 , Z);
 	for (int i = 0; i < N; i++) {
 		if (lucky_number <= roulette(i)) {
@@ -302,8 +312,6 @@ void mutation_elite(population &pop) {
 		int loci = uniform_integer( 1, genomeLength - 1);
 		mutant = i; //uniform_integer( 0, N - 1);
 		//Fill loci with mutantGenes genome points to be mutated
-		//rndChoice(loci.data(), mutantGenes, genomeLength);	//Choose locus to mutate
-		
 		//Copy an elite guy to a new guy to be a guinnea pig
 		elite_mutant = uniform_integer( 0, N_best - 1);
 		pop.copy(pop.newguys[mutant].genome, pop.bestguys[elite_mutant].genome);	//Copy DNA only!
@@ -317,7 +325,7 @@ void mutation_elite(population &pop) {
 			pop.copy(pop.guys[mutant], pop.newguys[mutant]);
 		}
 		else {
-			//Revert changes in newguys of latest events... i.e sync them for the next round
+			//Revert changes in newguys, i.e sync them for the next round
 			pop.copy(pop.newguys[mutant], pop.guys[mutant]);
 		}
 
@@ -435,13 +443,21 @@ void crossover_elite(population &pop) {
 		random_bestguy = uniform_integer( 0, N_best-1);
 		pop.copy(pop.newguys[selected(1)], pop.bestguys[random_bestguy]);
 		pop.newguys[selected(1)].born = pop.guys[selected(1)].born;		//Keep date of birth count
-		pop.newguys[selected(1)].t = pop.guys[selected(1)].t;						//Keep temperature
+		pop.newguys[selected(1)].t = pop.guys[selected(1)].t;			//Keep temperature
 
 		//Now selected(1) is some guy high on the temperature ladder with amazing bestguy-genes and fitness
 		expX(0) = exp(-(pop.newguys[selected(0)].H - lowest_H)); //good guy
 		expX(1) = exp(-(pop.newguys[selected(1)].H - lowest_H)); //gooder guy
         PXX = ( 1 / ((N - 1)*ZX)*(expX(0) + expX(1))); //P((xi,xj) | x)
-		
+
+        //Make sure the guy selected(0) and random_bestguys aren't already the same guy, or else they will have identical
+        //Offspring. Basically we would be copying back a bestguy into our list.
+        if ( pop.guys[selected(0)]. H == pop.bestguys[random_bestguy].H){
+            //Revert changes
+            pop.copy(pop.newguys[selected[0]], pop.guys[selected[0]]);
+            pop.copy(pop.newguys[selected[1]], pop.guys[selected[1]]);
+            continue;
+        }
 		//Now mate to create offspring. Let a bestGuy inject DNA in this process!
 		crossoverPoint = uniform_integer( 1, genomeLength - 1);
 		for (int i = 0; i < genomeLength; i++) {
