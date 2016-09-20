@@ -44,7 +44,7 @@ public:
 	counters count;
 
     long double champion_fitness();
-	Array<long double, Dynamic,1> champion_value();
+	Tensor<long double,3> champion_value();
 	int champion_number();
 	long double latest_history_diff();
     Array<long double,Dynamic,1> fitness_history;

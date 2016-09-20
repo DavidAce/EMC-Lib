@@ -3,6 +3,7 @@
 #define DNA_H   //  #define this so the compiler knows it has been included
 #include <Eigen/Dense>
 #include <Eigen/Core>
+#include <unsupported/Eigen/CXX11/Tensor>
 #include <bitset>
 #include <vector>
 #include <iostream>
@@ -34,19 +35,22 @@ private:
 public:
     DNA(objective_function &ref):obj_fun(ref)
     {
-        chromosomes.resize((unsigned long)nGenes);
-        parameters.resize(nGenes);
-        randomize_dna();
 
+        chromosomes.resize((unsigned long)nGenes);
+        parameters.resize(obj_fun.lower_bound.dimension(0),
+                          obj_fun.lower_bound.dimension(1),
+                          obj_fun.lower_bound.dimension(2));
+        randomize_dna();
     }
 
     DNA(objective_function &ref, bool ):obj_fun(ref) {
         chromosomes.resize((unsigned long)nGenes);
-        parameters.resize(nGenes);
-    }
+        parameters.resize(obj_fun.lower_bound.dimension(0),
+                          obj_fun.lower_bound.dimension(1),
+                          obj_fun.lower_bound.dimension(2));    }
 
-
-    Array<long double, Dynamic,1> parameters;						  //Decimal representation
+    Tensor<long double, 3> parameters;
+//    Array<long double, Dynamic ,1> parameters;						  //Decimal representation
     vector< bitset<maxbits> > chromosomes; //Binary representation
 
     bool operator== (const DNA& target);
@@ -57,7 +61,8 @@ public:
     void copy_loci(const int, const int);
 
     void set_parameter(const int,const long double);
-    void set_parameters(const Array<long double, Dynamic, 1>  &p);
+    void set_parameters(const  Array<long double,Dynamic,1>  &p);
+    void set_parameters(const  Tensor<long double,3>         &p);
     void update_parameters();
 };
 

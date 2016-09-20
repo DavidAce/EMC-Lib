@@ -6,7 +6,7 @@ using namespace std;
 using namespace EMC_constants;
 using namespace Eigen;
 
-Array<long double, Dynamic,1> species::champion_value() {
+Tensor<long double,3> species::champion_value() {
 	int best_index = 0;
 	long double best_H = pop[0].bestguys[N_best - 1].H;
 	for (int i = 1; i < M; i++) {
@@ -94,7 +94,7 @@ void species::print_progress(){
         cout << fixed << setprecision(19);
         if (obj_fun.id >= 0){cout << "ID: " << obj_fun.id << " "<< obj_fun.name << " ";}
         cout << "Generation... " << setw(7) << count.generation << " | Current Best: ";
-        cout << champion_value().transpose().eval().format(fmt) << "   | H = ";
+//        cout << champion_value().transpose().eval().format(fmt) << "   | H = ";
         cout << setw(22)  << champion_fitness() << " | " << " diff: ";
 		cout << setw(22)  << latest_history_diff();
         cout << endl;
@@ -108,7 +108,7 @@ void species::print_progress(bool){
     cout << fixed << setprecision(19);
     if (obj_fun.id >= 0){cout << "ID: " << obj_fun.id << " " << obj_fun.name << " ";}
     cout << "Generation... " << setw(7) << count.generation << " | Current Best: ";
-    cout << champion_value().transpose().eval().format(fmt) << "   | H = ";
+//    cout << champion_value().transpose().eval().format(fmt) << "   | H = ";
     cout << setw(22)  << champion_fitness() << " | " << " diff: ";
     cout << setw(22)  << latest_history_diff();
     cout << endl;

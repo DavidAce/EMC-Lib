@@ -4,12 +4,15 @@
 
 #include "EMC.h"
 #include <iomanip>
-#include <limits>
-
+#include <unsupported/Eigen/CXX11/Tensor>
 typedef std::numeric_limits< double > dbl;
 
-long double my_example_function(objective_function &obj_fun, Eigen::Array<long double, Dynamic, 1> &inputParameters){
-    return sqrt(inputParameters.cwiseAbs2().sum()) + obj_fun.aux[0].sum() - obj_fun.aux[1].sum(); //Minimum at 0
+long double my_example_function(objective_function &obj_fun, Eigen::Tensor<long double, 3> &inputParameters){
+    long double accumulator = 0;
+    for (int i = 0; i < inputParameters.size() ; i++){
+        accumulator += inputParameters(i)*inputParameters(i);
+    }
+    return sqrt(accumulator) + obj_fun.aux[0].sum() - obj_fun.aux[1].sum(); //Minimum at 0
 };
 
 
@@ -24,11 +27,11 @@ int main(){
     exampleData1 << 3,2,4,1;
 
     //Mandatory arrays!
-    Eigen::ArrayXd lower_bound(4);
-    Eigen::ArrayXd upper_bound(4);
+    Eigen::Tensor<long double,3> lower_bound(3,3,3);
+    Eigen::Tensor<long double,3> upper_bound(3,3,3);
 
-    lower_bound << -10, -10, -10 ,-10;
-    upper_bound <<  10,  10 , 10 , 10;
+    lower_bound.setConstant(-10);
+    upper_bound.setConstant(10) ;
     //The program terminates once the fitness does not improve beyond this tolerance
     double tolerance = 1e-16;
 
@@ -43,7 +46,6 @@ int main(){
     // Its output is a double (the fitness)
     // Its input  is a reference objective_function &obj_fun, and an ArrayXd &parameters with  fitting parameters
     minimize(obj_fun);
-
 
     return 0;
 }

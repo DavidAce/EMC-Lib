@@ -9,6 +9,8 @@
 #include <Eigen/Dense>
 #include <Eigen/Core>
 #include "constants.hpp"
+#include <unsupported/Eigen/CXX11/Tensor>
+
 using namespace Eigen;
 class objective_function{
 private:
@@ -27,10 +29,10 @@ public:
         threads = -1;
 
     };
-    typedef std::function<double(objective_function &, Array<long double, Dynamic, 1> &)> providedType ;
+    typedef std::function<long double(objective_function &, Tensor<long double, 3> &)> providedType ;
     providedType provided_function;
 
-    long double fitness(Array<long double, Dynamic, 1>  &parameters){
+    long double fitness(Tensor<long double, 3> &parameters){
 //        long double H = provided_function(*this, parameters);
 //        if (isinf(H)){H = 1e20;}
 //        if (isnan(H)){H = 1e20;}
@@ -41,10 +43,12 @@ public:
     int id; // Optional: An id for use in parallel (MPI) computations, when this lib is used elsewhere.
     string name;
     int threads; //Optional: Specify number of threads;
-    Array<double,Dynamic, Dynamic> lower_bound; //Minimum allowed values for each fitting parameter
-    Array<double,Dynamic, Dynamic> upper_bound; //Maximum allowed values for each fitting parameter
+    Tensor<long double,3> lower_bound;
+    Tensor<long double,3> upper_bound;
+//    Array<double,Dynamic, Dynamic> lower_bound; //Minimum allowed values for each fitting parameter
+//    Array<double,Dynamic, Dynamic> upper_bound; //Maximum allowed values for each fitting parameter
     double tolerance;                           //If the fitness saturates within tolerance, the program terminates
-    Array<long double, Dynamic, 1> optimum;
+    Tensor<long double ,3> optimum;
     int parameters;
     std::vector<Array<double,Dynamic,Dynamic>>  aux; //Auxiliary data or vectors for use in the fitness function
 //    typedef std::function<outputType(objective_function &, inputType &)> fitnessType ;

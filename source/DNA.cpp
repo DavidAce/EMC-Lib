@@ -99,17 +99,29 @@ void DNA::update_parameters() {
 
 }
 
-void DNA::set_parameters(const Array<long double, Dynamic, 1> &p) {
+void DNA::set_parameters(const  Array<long double,Dynamic,1> &p) {
     //Set all parameters at once with an ArrayXd
-    parameters = p;
+
     for (int i = 0; i < nGenes; i++) {
+        parameters(i) = p(i);
         chromosomes[i] = dec2bin(i);
     }
 }
 
+void DNA::set_parameters(const  Tensor<long double,3> &p) {
+    //Set all parameters at once with an ArrayXd
+    for (int i = 0; i < nGenes; i++) {
+        parameters(i) = p(i);
+        chromosomes[i] = dec2bin(i);
+    }
+}
+
+
 void DNA::randomize_dna(){
     chromosomes.resize((unsigned long)nGenes);
-    parameters.resize(nGenes);
+    parameters.resize(obj_fun.lower_bound.dimension(0),
+                      obj_fun.lower_bound.dimension(1),
+                      obj_fun.lower_bound.dimension(2));
     for (int i = 0; i < nGenes; i++) {
         parameters(i) = uniform_double(obj_fun.lower_bound(i), obj_fun.upper_bound(i));
         chromosomes[i] = dec2bin(i);

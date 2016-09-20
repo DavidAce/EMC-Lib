@@ -51,8 +51,8 @@ void minimize(objective_function & obj_fun){
 	//Print final parameters
     sp.print_progress(true);
     if (obj_fun.id >= 0){cout << "ID: " << obj_fun.id << " "<< obj_fun.name << " ";}
-    cout << "Best Parameters: "
-		 << sp.pop[sp.champion_number()].bestguys[N_best - 1].genome.parameters.transpose() <<"     | " ;
+    cout << "Best Parameters give H = : "
+		 << sp.pop[sp.champion_number()].bestguys[N_best - 1].H <<"     | " ;
 	//Print timing to console
 	sp.count.simulation_toc = high_resolution_clock::now();
 	printf("Total time:		%.3f seconds\n", std::chrono::duration<double>(sp.count.simulation_toc - sp.count.simulation_tic).count());
