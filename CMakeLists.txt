@@ -7,6 +7,9 @@ set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall -g -std=c++14 -Wno-dep
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3 -g -std=c++14 -march=native -Wno-deprecated-declarations -DNDEBUG")
 #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -std=c++14 -funroll-loops -march=native -frename-registers -Wno-deprecated-declarations -DNDEBUG")
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR})
+# Require MPI for this project:
+find_package(MPI REQUIRED)
+include_directories(${MPI_INCLUDE_PATH})
 find_package(Eigen3 REQUIRED)
 include_directories(${EIGEN3_INCLUDE_DIR})
 find_package(OpenMP)
@@ -17,9 +20,10 @@ if (OPENMP_FOUND)
     set (CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} ${OpenMP_CXX_FLAGS}")
 endif()
 
+
 file(GLOB SOURCES "source/*.cpp")
  
-add_executable(EMC ${SOURCES} example_main.cpp source/EMC.h source/constants.cpp source/objective_function.hpp source/objective_function.cpp)
+add_executable(EMC ${SOURCES} example_main.cpp source/EMC.h source/constants.cpp source/objective_function.hpp source/objective_function.cpp source/parallel_algorithms.cpp source/parallel_algorithms.h)
 
 #target_compile_options(EMC PUBLIC -std=c++14 -fopenmp -Wall -Wfloat-conversion -O3 -march=native -mno-avx -Wno-deprecated-declarations -DEIGEN_NO_DEBUG -DNDEBUG)
 

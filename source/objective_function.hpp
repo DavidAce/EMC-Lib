@@ -23,33 +23,33 @@ public:
               aux({in...})
     {
         provided_function = func;
-        parameters = (int) lower_bound.size();
+        num_parameters = (int) lower_bound.size();
         id = -1;
         name = "";
         threads = -1;
 
     };
-    typedef std::function<long double(objective_function &, Tensor<long double, 3> &)> providedType ;
+    typedef std::function<double(objective_function &, Tensor<double, 3> &)> providedType ;
     providedType provided_function;
 
-    long double fitness(Tensor<long double, 3> &parameters){
-//        long double H = provided_function(*this, parameters);
+    double fitness(Tensor<double, 3> &parameters){
+//        double H = provided_function(*this, parameters);
 //        if (isinf(H)){H = 1e20;}
 //        if (isnan(H)){H = 1e20;}
-//        return (long double)(-1.0 / log(H + EMC_constants::log_param) + EMC_constants::log_const + pow(log( 1/(H + 1)), 2));
+//        return (double)(-1.0 / log(H + EMC_constants::log_param) + EMC_constants::log_const + pow(log( 1/(H + 1)), 2));
         return provided_function(*this, parameters);
     }
 
     int id; // Optional: An id for use in parallel (MPI) computations, when this lib is used elsewhere.
     string name;
     int threads; //Optional: Specify number of threads;
-    Tensor<long double,3> lower_bound;
-    Tensor<long double,3> upper_bound;
+    Tensor<double,3> lower_bound;
+    Tensor<double,3> upper_bound;
 //    Array<double,Dynamic, Dynamic> lower_bound; //Minimum allowed values for each fitting parameter
 //    Array<double,Dynamic, Dynamic> upper_bound; //Maximum allowed values for each fitting parameter
     double tolerance;                           //If the fitness saturates within tolerance, the program terminates
-    Tensor<long double ,3> optimum;
-    int parameters;
+    Tensor<double ,3> optimum;
+    int num_parameters;
     std::vector<Array<double,Dynamic,Dynamic>>  aux; //Auxiliary data or vectors for use in the fitness function
 //    typedef std::function<outputType(objective_function &, inputType &)> fitnessType ;
 

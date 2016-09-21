@@ -3,12 +3,11 @@
 //
 
 #include "EMC.h"
-#include <iomanip>
+#include <mpi.h>
 #include <unsupported/Eigen/CXX11/Tensor>
-typedef std::numeric_limits< double > dbl;
 
-long double my_example_function(objective_function &obj_fun, Eigen::Tensor<long double, 3> &inputParameters){
-    long double accumulator = 0;
+double my_example_function(objective_function &obj_fun, Eigen::Tensor<double, 3> &inputParameters){
+    double accumulator = 0;
     for (int i = 0; i < inputParameters.size() ; i++){
         accumulator += inputParameters(i)*inputParameters(i);
     }
@@ -18,6 +17,11 @@ long double my_example_function(objective_function &obj_fun, Eigen::Tensor<long 
 
 int main(){
     cout << "This example minimizes a 2D paraboloid f(x,y) = sqrt(x^2 + y^2) with solution (0,0)" << endl;
+    MPI_Init(NULL, NULL);
+    int world_ID,world_size;
+    MPI_Comm_rank(MPI_COMM_WORLD, &world_ID);           //Establish thread number of this worker
+    MPI_Comm_size(MPI_COMM_WORLD, &world_size);         //Get total number of threads
+
 
     //This example data is there to showcase the syntax of the program.
     Eigen::ArrayXd exampleData0(4);
@@ -27,8 +31,8 @@ int main(){
     exampleData1 << 3,2,4,1;
 
     //Mandatory arrays!
-    Eigen::Tensor<long double,3> lower_bound(3,3,3);
-    Eigen::Tensor<long double,3> upper_bound(3,3,3);
+    Eigen::Tensor<double,3> lower_bound(3,3,3);
+    Eigen::Tensor<double,3> upper_bound(3,3,3);
 
     lower_bound.setConstant(-10);
     upper_bound.setConstant(10) ;
@@ -46,6 +50,7 @@ int main(){
     // Its output is a double (the fitness)
     // Its input  is a reference objective_function &obj_fun, and an ArrayXd &parameters with  fitting parameters
     minimize(obj_fun);
+    MPI_Finalize();
 
     return 0;
 }

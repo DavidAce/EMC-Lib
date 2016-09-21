@@ -6,9 +6,9 @@ using namespace std;
 using namespace EMC_constants;
 using namespace Eigen;
 
-Tensor<long double,3> species::champion_value() {
+Tensor<double,3> species::champion_value() {
 	int best_index = 0;
-	long double best_H = pop[0].bestguys[N_best - 1].H;
+	double best_H = pop[0].bestguys[N_best - 1].H;
 	for (int i = 1; i < M; i++) {
 		if (pop[i].bestguys[N_best - 1].H < best_H) {
 			best_index = i;
@@ -18,8 +18,8 @@ Tensor<long double,3> species::champion_value() {
 	return pop[best_index].bestguys[N_best - 1].genome.parameters;
 }
 
-long double species::champion_fitness() {
-	long double best_H = pop[0].bestguys[N_best - 1].H;
+double species::champion_fitness() {
+	double best_H = pop[0].bestguys[N_best - 1].H;
 	for (int i = 1; i < M; i++) {
 		if (pop[i].bestguys[N_best - 1].H < best_H) {
 			best_H = pop[i].bestguys[N_best - 1].H;
@@ -30,7 +30,7 @@ long double species::champion_fitness() {
 
 int species::champion_number() {
 	int best_index = 0;
-	long double best_H = pop[0].bestguys[N_best - 1].H;
+	double best_H = pop[0].bestguys[N_best - 1].H;
 	for (int i = 1; i < M; i++) {
 		if (pop[i].bestguys[N_best - 1].H < best_H) {
 			best_index = i;
@@ -45,7 +45,7 @@ void species::store_best_fitness() {
         if(fitness_history.size() <= count.store_counter) {
             fitness_history.conservativeResize(2 * max(1,count.store_counter));
         }
-        long double champ = champion_fitness();
+        double champ = champion_fitness();
         if (count.store_counter > 0){
             if(champ == fitness_history(count.store_counter-1)){
                 count.store_last_since++;
@@ -67,10 +67,10 @@ void species::store_best_fitness() {
     }
 }
 
-long double species::latest_history_diff() {
+double species::latest_history_diff() {
 
     int n = min(EMC_constants::num_check_history, count.store_counter);
-    long double diff = 1;
+    double diff = 1;
     int from = count.store_counter - n;
     if (from > 0){
         diff = (fitness_history.segment(from-1, n) - fitness_history.segment(from,n)).mean();

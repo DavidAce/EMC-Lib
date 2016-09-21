@@ -34,7 +34,7 @@ namespace EMC_rnd{
 
     template <typename inType1, typename inType2>
     inline inType1 gaussian_truncated(const inType1 lowerLimit, const inType1 upperLimit, const inType2 mean, const inType2 std){
-        std::normal_distribution<long double> distribution(mean,std);
+        std::normal_distribution<double> distribution(mean,std);
         inType1 ul = fmaxl(lowerLimit, upperLimit);
         inType1 ll = fminl(lowerLimit, upperLimit);
         inType1 number;

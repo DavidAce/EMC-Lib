@@ -23,8 +23,8 @@ namespace EMC_constants {
 	const double Tmin 			= 0.0001;			//Minimum temperature of the ladder. Preferrably between close to 1
 	const double Tmax 			= 50;				//Maximum temperature of the ladder. Preferrably around H_max
 	const int seed 				= 8;				//Seed for the random number generator
-	const long double log_param 		= 1.3;
-	const long double log_const 		= (long double) (1/log(log_param));
+	const double log_param 		= 1.3;
+	const double log_const 		= (double) (1/log(log_param));
 	
 	//Probabilities genetic operators
 	const double qmig = 0.005;						//The migration probability vs evolution probability

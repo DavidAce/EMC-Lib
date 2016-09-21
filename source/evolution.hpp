@@ -25,14 +25,14 @@ class population;	//Forward declaration
 class personality;	//Forward declaration
 
 extern void evolve (population &);
-extern void find_lowest_guy(const vector<personality> &guys, long double &lowest_H, unsigned int &lowest_i );
-extern void find_lowest_guy_excluding(const vector<personality> &guys, long double &lowest_H, unsigned int &lowest_i, std::set<unsigned int> &excluded );
+extern void find_lowest_guy(const vector<personality> &guys, double &lowest_H, unsigned int &lowest_i );
+extern void find_lowest_guy_excluding(const vector<personality> &guys, double &lowest_H, unsigned int &lowest_i, std::set<unsigned int> &excluded );
 extern void exchange(population &);
 extern void migration(species &);
 extern void insertguy(population &, int , int );
 extern void find_elite(population &);
 
-extern void roulette_select(const vector<personality> &guys, Array2i &selected, long double &Z, long double lowest_H  );
+extern void roulette_select(const vector<personality> &guys, Array2i &selected, double &Z, double lowest_H  );
 extern void bitselector_smartCopy(population &, Array2i &selected, Array4i &, Array4i &);
 
 extern void mutation            (population &);

@@ -29,7 +29,7 @@ void evolve(population &pop) {
 }
 
 
-void find_lowest_guy(const vector<personality> &guys, long double &lowest_H, unsigned int &lowest_i ){
+void find_lowest_guy(const vector<personality> &guys, double &lowest_H, unsigned int &lowest_i ){
     lowest_H = guys[0].H;
     lowest_i = 0;
     for (unsigned int i = 0; i < guys.size(); i++){
@@ -40,7 +40,7 @@ void find_lowest_guy(const vector<personality> &guys, long double &lowest_H, uns
     }
 }
 
-void find_lowest_guy_excluding(const vector<personality> &guys, long double &lowest_H, unsigned int &lowest_i, std::set<unsigned int> &excluded ){
+void find_lowest_guy_excluding(const vector<personality> &guys, double &lowest_H, unsigned int &lowest_i, std::set<unsigned int> &excluded ){
     lowest_H = guys[0].H;
     lowest_i = 0;
     for (unsigned int i = 0; i < guys.size(); i++){
@@ -54,7 +54,7 @@ void find_lowest_guy_excluding(const vector<personality> &guys, long double &low
 
 void exchange(population &pop) {
     int i, j, ex; //ex is the exchange iteration
-    long double re, dH, dt_inv;
+    double re, dH, dt_inv;
     for (ex = 0; ex < N; ex++) {
         i = uniform_integer( 0, N - 1);										//Chose a guy...
         j = i == 0 ? 1 : (i== N-1? N-2: i + 2 * uniform_integer( 0, 1) - 1);	//And a neighbor
@@ -78,12 +78,12 @@ void exchange(population &pop) {
         }
     }
 }
-void migration(species &sp) {
+void migration(population &pop) {
     //First select randomly m out of M pobulations, subject to migration
     //Then select randomly  n (n=1?) out of N guys to migrate
     //Accept the new population based on the new population fitness score
     int n;										//Guy chosen to migrate
-    long double dH;									//Probability of migration
+    double dH;									//Probability of migration
     int m = uniform_integer(2, M);		//How many populations to migrate
     ArrayXi s_pop(m);							//Array of sender populations
     ArrayXi r_pop(m);							//Array of receiving populations
@@ -117,7 +117,7 @@ void insertguy(population &pop, int from, int to) {
 void find_elite(population &pop) {
     //Here we attempt to find someone better in guys that is better than any guy in best_guys
     std::set<unsigned int> tried_guys;
-    long double lowest_H;
+    double lowest_H;
     unsigned int lowest_i;
     int j = 0; //Counts how many have been tried
     while (j < N_best) {
@@ -140,7 +140,7 @@ void find_elite(population &pop) {
 }
 
 
-//void roulette_select(vector<personality> &guys, ArrayXi &selected, long double &Z, double s) {
+//void roulette_select(vector<personality> &guys, ArrayXi &selected, double &Z, double s) {
 //    //Selected 0 is the guy with good fitness (lowest), selected 1 is random
 //
 //    //double total_H = 0;
@@ -149,7 +149,7 @@ void find_elite(population &pop) {
 //    //Make a roulette wheel
 //    Z = 0;
 //    for (int i = 0; i < N; i++) {
-//        Z += static_cast<long double>(exp(-guys[i].H / s));
+//        Z += static_cast<double>(exp(-guys[i].H / s));
 //        roulette(i) = static_cast <double> (Z); //Cumulative sum - Low fitness gives large area on roulette
 //    }
 //    lucky_number = uniform_double( 0.0 , static_cast<double>(Z));
@@ -165,12 +165,12 @@ void find_elite(population &pop) {
 //    }
 //}
 
-void roulette_select(const vector<personality> &guys, Array2i &selected, long double &Z, long double lowest_H) {
+void roulette_select(const vector<personality> &guys, Array2i &selected, double &Z, double lowest_H) {
 	//Selected 0 is the guy with good fitness (lowest), selected 1 is random
 
-	Array<long double, N, 1> roulette;
+	Array<double, N, 1> roulette;
 
-	long double lucky_number;
+	double lucky_number;
 	//Make a roulette wheel
     //Start by finding the best guy in the list
 	Z = 0;
@@ -188,7 +188,7 @@ void roulette_select(const vector<personality> &guys, Array2i &selected, long do
 //        cout << allt.transpose() << endl;
 //        cout << allZ.transpose() << endl << endl;
 //    }
-	lucky_number = uniform_double( (long double) 0.0 , Z);
+	lucky_number = uniform_double( (double) 0.0 , Z);
 	for (int i = 0; i < N; i++) {
 		if (lucky_number <= roulette(i)) {
 			selected(0) = i;
@@ -275,7 +275,7 @@ inline void bitselector_smartCopy(population &pop, Array2i &selected, Array4i &n
 void mutation(population &pop) {
 	int mutantGenes;	//Number of points to mutate
 	int mutant;			//Which guy to mutate
-	long double dH;
+	double dH;
 	//#pragma omp parallel for private(mutantGenes, mutant,dH)
 	for (int i = 0; i < N; i++) {
 		mutantGenes =  uniform_integer( 1, genomeLength - 1);
@@ -305,7 +305,7 @@ void mutation_elite(population &pop) {
 	//int mutantGenes;	//Number of points to mutate
 	int mutant;			//which guy to mutate
 	int elite_mutant;	//Which elite guy to receive wisdom from
-	long double dH;
+	double dH;
 	//#pragma omp parallel for private( mutant, elite_mutant,dH)
 	for (int i = 0; i < N; i++) {
 		//mutantGenes = 1;// uniform_integer( 1, genomeLength - 1);
@@ -335,19 +335,19 @@ void mutation_elite(population &pop) {
 void crossover(population &pop) {
 	int nMatings = (int)(0.2*N);
 	Array2i selected(2);
-    Array<long double, 2,1> expX;
-    Array<long double, 2,1> expY;
+    Array<double, 2,1> expX;
+    Array<double, 2,1> expY;
 //	ArrayXd expX(2);
 //	ArrayXd expY(2);
 	int crossoverPoint;
-	long double rc;
-    long double dHt0, dHt1;
-	long double PXX, PYY;			//Selection probabilities
-	long double PXY = 1, PYX = 1;	//Generating probabilities (PXY = PYX for this operator)
-	long double TXY, TYX;			//Transition probability
-    long double lowest_H;
+	double rc;
+    double dHt0, dHt1;
+	double PXX, PYY;			//Selection probabilities
+	double PXY = 1, PYX = 1;	//Generating probabilities (PXY = PYX for this operator)
+	double TXY, TYX;			//Transition probability
+    double lowest_H;
     unsigned int lowest_i;
-	long double ZX, ZY;		//Sum of Boltzmann-weights for current (X) and offspring(Y) populations
+	double ZX, ZY;		//Sum of Boltzmann-weights for current (X) and offspring(Y) populations
 
 	for (int matings = 0; matings < nMatings; matings++) {
         ZX=0;
@@ -422,14 +422,14 @@ void crossover_elite(population &pop) {
 	int nMatings = (int)(0.2*N);
 	Array2i selected(2);
 	int crossoverPoint;
-    long double ZX,ZY;
-	long double rc, dHt0, dHt1;
-	long double PXX, PYY;			//Selection probabilities
-	long double PXY, PYX;	        //Generating probabilities (PXY = PYX for this operator)
-	long double TXY, TYX;			//Transition probability
-    Array<long double, 2,1> expX;
-    Array<long double, 2,1> expY;
-    long double lowest_H;
+    double ZX,ZY;
+	double rc, dHt0, dHt1;
+	double PXX, PYY;			//Selection probabilities
+	double PXY, PYX;	        //Generating probabilities (PXY = PYX for this operator)
+	double TXY, TYX;			//Transition probability
+    Array<double, 2,1> expX;
+    Array<double, 2,1> expY;
+    double lowest_H;
     unsigned int lowest_i;
 	int random_bestguy; //Guy to inject into selected[1]
 	for (matings = 0; matings < nMatings; matings++) {
@@ -525,14 +525,14 @@ void crossover_smartCopy(population &pop) {
 	int matings;
 	int nMatings = (int)(0.2*N);
 	Array2i selected;
-    long double ZX, ZY;
-    long double rc, dHt0, dHt1;
-	long double PXX, PYY; //Selection probabilities
-	long double PXY, PYX; //Generating probabilities (PXY != PYX for this operator)
-	long double TXY, TYX; //Transition probability
-    Array<long double, 2,1> expX;
-    Array<long double, 2,1> expY;
-    long double lowest_H;
+    double ZX, ZY;
+    double rc, dHt0, dHt1;
+	double PXX, PYY; //Selection probabilities
+	double PXY, PYX; //Generating probabilities (PXY != PYX for this operator)
+	double TXY, TYX; //Transition probability
+    Array<double, 2,1> expX;
+    Array<double, 2,1> expY;
+    double lowest_H;
     unsigned int lowest_i;
 	Array4i n_ab_XY; //Exponents for smartCopy probabilities. Note that n_ab.sum() = genomeLength
 	Array4i n_ab_YX; //Exponents for smartCopy probabilities. Note that n_ab.sum() = genomeLength
@@ -607,9 +607,9 @@ void crossover_snooker(population &pop) {
 	//Distance in terms of r between guys
 	//double distance = pop.line.distance(pop.guys[selected(1)].genome.parameters,pop.guys[selected(0)].genome.parameters);
 	//Vary r to find the walls of the parameter domain
-    long double r_max = pop.line.line_max();
-    long double r_min = pop.line.line_min();
-	Array<long double, Dynamic, 1> r_point(r_num);
+    double r_max = pop.line.line_max();
+    double r_min = pop.line.line_min();
+	Array<double, Dynamic, 1> r_point(r_num);
     if( isinf(r_min) || isinf(r_max)){
         return;
     }
@@ -629,14 +629,14 @@ void crossover_snooker(population &pop) {
 	}
 	//Time to make a roulette to see which "r" is chosenpop.
 
-	Array<long double, r_num,1> roulette;
+	Array<double, r_num,1> roulette;
 	double lucky_number = uniform_double_1();
-    long double lowest_H;
+    double lowest_H;
     unsigned int lowest_i;
 
     find_lowest_guy(pop.snookerGuys, lowest_H,lowest_i);
 	//Make a roulette wheel
-	long double Z = 0;
+	double Z = 0;
 
     for (int i = 0; i < r_num; i++) {
 		Z += exp(-(pop.snookerGuys[i].H - lowest_H)); //Area on roulette wheel proportional to Boltzmann weights

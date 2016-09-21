@@ -5,6 +5,11 @@
 #include <Eigen/Dense>
 #include <Eigen/Core>
 #include <set>
+#include <chrono>
+#include <iomanip>
+#include <string>
+#include <fstream>
+#include <time.h>
 
 #include "personality.hpp"
 #include "objective_function.hpp"
@@ -18,8 +23,8 @@ using namespace Eigen;
 class paramLine{
 	private:
         objective_function &obj_fun;
-        Array<long double,Dynamic,1>  o;
-        Array<long double,Dynamic,1>  d;
+        Array<double,Dynamic,1>  o;
+        Array<double,Dynamic,1>  d;
 	public:
 		paramLine(objective_function &ref)
                 :obj_fun(ref){
@@ -27,7 +32,7 @@ class paramLine{
             d.resize(nGenes);
         };
 		//Always use "Through" first, to set "o" and "d".
-		void Through(Tensor<long double,3> &p1, Tensor<long double,3>  &p2){ //Points in parameter space p1 and p2
+		void Through(Tensor<double,3> &p1, Tensor<double,3>  &p2){ //Points in parameter space p1 and p2
             for(int i = 0;i < nGenes; i++){
 				o(i) = p1(i);
 				d(i) = p2(i) - p1(i);
@@ -41,14 +46,14 @@ class paramLine{
 			}
 			return v;
 		}
-        ArrayXd subtract(long double t[],  long double a[]){
+        ArrayXd subtract(double t[],  double a[]){
             ArrayXd result(nGenes);
             for (int i = 0; i < nGenes ; i++){
                 result (i) = (int) ( t[i] - a[i]);
             }
             return result;
         }
-//		double distance(Tensor<long double,Dynamic> &p1, Tensor<long double,Dynamic>  &p2){
+//		double distance(Tensor<double,Dynamic> &p1, Tensor<double,Dynamic>  &p2){
 //			return sqrt((p2.cast<double>()-p1.cast<double>()).square().sum());
 //		}
 		double line_max() { //Get the largest r within upper boundary Bu and lower boundary Bl
@@ -60,13 +65,30 @@ class paramLine{
 	    }
 };
 
+
+typedef std::chrono::high_resolution_clock Clock;
+class counters {
+public:
+	int store_counter;
+	int store_last_since;
+	int generation;
+	double simulation_time;
+	Clock::time_point simulation_tic;
+	Clock::time_point simulation_toc;
+	double evolution_time;
+	Clock::time_point evolution_tic;
+	Clock::time_point evolution_toc;
+};
+
+
+
+
 class population{
 private:
-//	void getFitness(personality& guy);
+
 	void wakeUpGuys();
 	void wakeUpNewGuys();
 	void wakeUpBest();
-//    void getFitness4All();
 	objective_function &obj_fun;
 public:
 	population(objective_function &ref)
@@ -90,10 +112,11 @@ public:
 
     paramLine line;	//for doing the snooker crossover
     int generation;  //Number of generations for this population
+	counters count;
 
     void getFitness(personality &guy);
-    void getFitness(const Array<long double,Dynamic,1>  &point, personality &guy);
-    void getFitness(const Tensor<long double,3> &point, personality &guy);
+    void getFitness(const Array<double,Dynamic,1>  &point, personality &guy);
+    void getFitness(const Tensor<double,3> &point, personality &guy);
 
     void copy(personality &destination, const personality & source);
     void copy(DNA& destination, const DNA& source);

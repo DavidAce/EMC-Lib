@@ -19,13 +19,13 @@ void population::getFitness(personality& guy){
 	guy.H = obj_fun.fitness(guy.genome.parameters);
 }
 
-void population::getFitness(const Tensor<long double, 3> &p, personality &guy){
+void population::getFitness(const Tensor<double, 3> &p, personality &guy){
     //Set all parameters at once with an ArrayXd
     guy.genome.set_parameters(p);
     guy.H = obj_fun.fitness(guy.genome.parameters);
 }
 
-void population::getFitness(const Array<long double, Dynamic,1> &p, personality &guy){
+void population::getFitness(const Array<double, Dynamic,1> &p, personality &guy){
     //Set all parameters at once with an ArrayXd
     guy.genome.set_parameters(p);
     guy.H = obj_fun.fitness(guy.genome.parameters);
@@ -67,10 +67,10 @@ void population::wakeUpGuys() {
 
 void population::wakeUpBest() {
 //	ArrayXi copied_guys(N_best);
-    std::set<unsigned long int> copied_guys;
+    std::set<unsigned int> copied_guys;
     int j = 0;
 
-    long double  lowest_H;
+    double  lowest_H;
 	unsigned int lowest_i; //The position i on the temperature ladder of the guy with lowest H
     while (copied_guys.size() < N_best && j < N_best) {
         lowest_H = guys[0].H;

@@ -83,7 +83,7 @@ bitset<maxbits> DNA::dec2bin(const int i) {
 }
 
 
-void DNA::set_parameter(const int i, const long double p) {
+void DNA::set_parameter(const int i, const double p) {
     //Set one parameter with a double
     parameters(i) = p;
     chromosomes[i] = dec2bin(i);
@@ -99,7 +99,7 @@ void DNA::update_parameters() {
 
 }
 
-void DNA::set_parameters(const  Array<long double,Dynamic,1> &p) {
+void DNA::set_parameters(const  Array<double,Dynamic,1> &p) {
     //Set all parameters at once with an ArrayXd
 
     for (int i = 0; i < nGenes; i++) {
@@ -108,7 +108,7 @@ void DNA::set_parameters(const  Array<long double,Dynamic,1> &p) {
     }
 }
 
-void DNA::set_parameters(const  Tensor<long double,3> &p) {
+void DNA::set_parameters(const  Tensor<double,3> &p) {
     //Set all parameters at once with an ArrayXd
     for (int i = 0; i < nGenes; i++) {
         parameters(i) = p(i);
@@ -118,7 +118,7 @@ void DNA::set_parameters(const  Tensor<long double,3> &p) {
 
 
 void DNA::randomize_dna(){
-    chromosomes.resize((unsigned long)nGenes);
+    chromosomes.resize((unsigned int)nGenes);
     parameters.resize(obj_fun.lower_bound.dimension(0),
                       obj_fun.lower_bound.dimension(1),
                       obj_fun.lower_bound.dimension(2));

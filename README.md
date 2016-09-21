@@ -55,7 +55,7 @@ can be used to actually compute your minimizing function and are available as me
 
 Lastly, `my_function` is a pointer to a function of return type `long double`, declared as:
 
-        long double my_function(objective_function &obj_fun, Eigen::Array<long double, Dynamic, 1> &inputParameters);
+        double my_function(objective_function &obj_fun, Eigen::Array<long double, Dynamic, 1> &inputParameters);
 
 In its definition, you will have to write a function body that maps `inputParameters` (and optionally `obj_fun.aux[]`) into
 a real scalar value like an "Fitness" (or "Energy") that you wish to minimize.

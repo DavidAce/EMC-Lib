@@ -33,10 +33,10 @@ public:
             born(0),
             genome(ref,toggle) {
 	};
-	long double t; 							//temperature
+	double t; 							//temperature
 	int born;							//Generation when DNA first emerged
 	DNA genome;							//Contains binary and real representation of parameters
-	long double H;					//Fitness, or energy
+	double H;					//Fitness, or energy
 	friend ostream &operator<<(std::ostream &os, personality const &);
 
 };

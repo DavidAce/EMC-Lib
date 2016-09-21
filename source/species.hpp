@@ -31,7 +31,6 @@ public:
 };
 
 
-
 class species{
 private:
     objective_function &obj_fun;
@@ -43,11 +42,11 @@ public:
     vector<population> pop;		//Array of separate populations to evolve independently
 	counters count;
 
-    long double champion_fitness();
-	Tensor<long double,3> champion_value();
+    double champion_fitness();
+	Tensor<double,3> champion_value();
 	int champion_number();
-	long double latest_history_diff();
-    Array<long double,Dynamic,1> fitness_history;
+	double latest_history_diff();
+    Array<double,Dynamic,1> fitness_history;
     void store_best_fitness();
     bool below_tolerance();
     void print_progress();

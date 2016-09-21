@@ -1,13 +1,14 @@
 // PID.cpp : Defines the entry point for the console application.
 //
 #include "EMC.h"
-
+#include <mpi.h>
 
 //boundaries bounds;
 void minimize(objective_function & obj_fun){
-	//Start up some files and folder for saving out
+
+    //Start up some files and folder for saving out
     obj_fun.tolerance           = fmax(1e-18, obj_fun.tolerance);
-    EMC_constants::nGenes 	   	= obj_fun.parameters;
+    EMC_constants::nGenes 	   	= obj_fun.num_parameters;
     EMC_constants::geneLength   = 2+min(58,(int)ceil(-log(obj_fun.tolerance)/log(2)));
     EMC_constants::genomeLength = EMC_constants::nGenes * EMC_constants::geneLength;
     omp_set_dynamic(0);     // Explicitly disable dynamic teams
@@ -20,33 +21,17 @@ void minimize(objective_function & obj_fun){
     }
 
     Eigen::initParallel();
-    species sp(obj_fun);
+    population pop(obj_fun);
 
     rng.seed(EMC_constants::seed);
 	//Start algorithm
-	sp.count.simulation_tic = high_resolution_clock::now();
-    rng.seed(EMC_constants::seed + (unsigned long)omp_get_thread_num());
-    cout << "OpenMP Threads: " << EMC_constants::M << endl;
-    #pragma omp parallel num_threads(EMC_constants::M)
-    while (sp.count.generation < EMC_constants::max_generations &&  !sp.below_tolerance()) {
-		#pragma omp single nowait
-        {
-            sp.print_progress();
-            sp.store_best_fitness();
-        }
-        #pragma omp single nowait
-        {
-        if (EMC_constants::M > 1) {
-            if (uniform_double_1() < qmig) {
-                migration(sp);
-            }
-        }
-		}
-		#pragma omp for nowait
-		for (int i = 0; i < M; i++) {
-//            cout << "OpenMP Threads: " << omp_get_num_threads() << " Populations: " << EMC_constants::M << endl;
-            evolve(sp.pop[i]); 			//Evolve all the populations
-		}
+	pop.count.simulation_tic = high_resolution_clock::now();
+    rng.seed(EMC_constants::seed + (unsigned int)omp_get_thread_num());
+    while (pop.count.generation < EMC_constants::max_generations &&  !sp.below_tolerance()) {
+        sp.print_progress();
+        sp.store_best_fitness();
+        migration(pop);
+        evolve(pop); 			//Evolve all the populations
 	}
 	//Print final parameters
     sp.print_progress(true);

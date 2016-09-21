@@ -36,7 +36,7 @@ public:
     DNA(objective_function &ref):obj_fun(ref)
     {
 
-        chromosomes.resize((unsigned long)nGenes);
+        chromosomes.resize((unsigned int)nGenes);
         parameters.resize(obj_fun.lower_bound.dimension(0),
                           obj_fun.lower_bound.dimension(1),
                           obj_fun.lower_bound.dimension(2));
@@ -44,12 +44,12 @@ public:
     }
 
     DNA(objective_function &ref, bool ):obj_fun(ref) {
-        chromosomes.resize((unsigned long)nGenes);
+        chromosomes.resize((unsigned int)nGenes);
         parameters.resize(obj_fun.lower_bound.dimension(0),
                           obj_fun.lower_bound.dimension(1),
                           obj_fun.lower_bound.dimension(2));    }
 
-    Tensor<long double, 3> parameters;
+    Tensor<double, 3> parameters;
 //    Array<long double, Dynamic ,1> parameters;						  //Decimal representation
     vector< bitset<maxbits> > chromosomes; //Binary representation
 
@@ -60,9 +60,9 @@ public:
     void flip_loci(ArrayXi &);
     void copy_loci(const int, const int);
 
-    void set_parameter(const int,const long double);
-    void set_parameters(const  Array<long double,Dynamic,1>  &p);
-    void set_parameters(const  Tensor<long double,3>         &p);
+    void set_parameter(const int,const double);
+    void set_parameters(const  Array<double,Dynamic,1>  &p);
+    void set_parameters(const  Tensor<double,3>         &p);
     void update_parameters();
 };
 
