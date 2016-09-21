@@ -7,19 +7,19 @@ using namespace Eigen;
 namespace EMC_constants {
 	//Evolutionary parameters
     extern int M 				;  		    		//Number of populations in a species (= threads in OpenMP)
-	const int N 				= 20;				//Number of individuals per population
+	const   int N 				= 20;				//Number of individuals per population
 	const int N_best			= 5;				//Number of individuals in "hall of fame". Best individuals of all time (per population)
 	extern int geneLength;          				//Number of bits per gene (The number of possible values for a parameter is 2^geneLength-1)
 	extern int nGenes;								//Number of parameters in your model. This is set in datafiles.cpp, inData::inData
 	extern int genomeLength;						//Number of bits for all genes, This is set in datafiles.cpp, inData::inData
-    const int maxbits           = 60;
+    const int maxbits           = 56;
 
     const  int max_generations 	= (int)1e5;			//Number of generations to run the simulation
-
-    const int print_freq        = 250;
-	const int store_freq        = 10;
-    const int check_freq        = 10;
-	const int num_check_history = 10;
+	const int rate_migration  	= 500;				//The migration rate  (in units of generations)
+	const int rate_store_best  	= 100;				//The rate (in units of generations) at which the best fitness (champions) is stored
+	const int rate_check_conv  	= 200;				//The rate (in units of generations) at which convergence is checked.
+	const int rate_print		= 500;				//The migration rate
+	const int num_check_history = 500;				//The number of (latest) stored champions that are checked for convergence.
 	const double Tmin 			= 0.0001;			//Minimum temperature of the ladder. Preferrably between close to 1
 	const double Tmax 			= 50;				//Maximum temperature of the ladder. Preferrably around H_max
 	const int seed 				= 8;				//Seed for the random number generator
@@ -27,11 +27,10 @@ namespace EMC_constants {
 	const double log_const 		= (double) (1/log(log_param));
 	
 	//Probabilities genetic operators
-	const double qmig = 0.005;						//The migration probability vs evolution probability
-	const double qm   = 0.25;							//The mutation probability vs crossover (1-qm for crossover)
-	const double qma  = 0.25;//0.005;					//elite mutation rate (qm*(1-qma) for regular mutation)
-	const double qe   = 0.2;							//elite crossover vs regular crossover
-	const int r_num   = 10;							//Number of points to sample on snooker crossover (10-100 is ok, higher is slower but more thorough)
+	const double qm   = 0.5;							//The mutation probability vs crossover (1-qm for crossover)
+	const double qma  = 0.5;//0.005;					//elite mutation rate (qm*(1-qma) for regular mutation)
+	const double qe   = 0.5;							//elite crossover vs regular crossover
+	const int r_num   = 16;								//Number of points to sample on snooker crossover (10-100 is ok, higher is slower but more thorough)
 	
 	//Probabilities for smart copy crossover
 	const double P0 = 0.1;							//If parents have the  SAME bit, reverse with probability p0

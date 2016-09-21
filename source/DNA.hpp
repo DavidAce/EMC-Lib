@@ -35,21 +35,24 @@ private:
 public:
     DNA(objective_function &ref):obj_fun(ref)
     {
-
+        EMC_constants::nGenes = obj_fun.num_parameters;
+        EMC_constants::nGenes = obj_fun.num_parameters;
+        EMC_constants::geneLength   = 2+min(54,(int)ceil(-log(obj_fun.tolerance)/log(2)));
+        EMC_constants::genomeLength = EMC_constants::nGenes * EMC_constants::geneLength;
         chromosomes.resize((unsigned int)nGenes);
-        parameters.resize(obj_fun.lower_bound.dimension(0),
-                          obj_fun.lower_bound.dimension(1),
-                          obj_fun.lower_bound.dimension(2));
+        parameters.resize ((unsigned int)nGenes);
         randomize_dna();
     }
 
     DNA(objective_function &ref, bool ):obj_fun(ref) {
+        EMC_constants::nGenes = obj_fun.num_parameters;
+        EMC_constants::geneLength   = 2+min(54,(int)ceil(-log(obj_fun.tolerance)/log(2)));
+        EMC_constants::genomeLength = EMC_constants::nGenes * EMC_constants::geneLength;
         chromosomes.resize((unsigned int)nGenes);
-        parameters.resize(obj_fun.lower_bound.dimension(0),
-                          obj_fun.lower_bound.dimension(1),
-                          obj_fun.lower_bound.dimension(2));    }
+        parameters.resize ((unsigned int)nGenes);
+    }
 
-    Tensor<double, 3> parameters;
+    ArrayXd parameters;
 //    Array<long double, Dynamic ,1> parameters;						  //Decimal representation
     vector< bitset<maxbits> > chromosomes; //Binary representation
 
@@ -61,9 +64,9 @@ public:
     void copy_loci(const int, const int);
 
     void set_parameter(const int,const double);
-    void set_parameters(const  Array<double,Dynamic,1>  &p);
-    void set_parameters(const  Tensor<double,3>         &p);
+    void set_parameters(const  ArrayXd  &p);
     void update_parameters();
+    void update_chromosomes();
 };
 
 #endif

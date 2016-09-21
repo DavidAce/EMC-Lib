@@ -10,6 +10,7 @@
 #include <Eigen/Core>
 #include "constants.hpp"
 #include <unsupported/Eigen/CXX11/Tensor>
+#include <iostream>
 
 using namespace Eigen;
 class objective_function{
@@ -17,42 +18,44 @@ private:
 public:
     template <typename func_type,typename boundaryType, typename... aux_args>
     objective_function(func_type func, boundaryType lower, boundaryType upper, double tol,aux_args... in)
-            : lower_bound(lower),
-              upper_bound(upper),
-              tolerance(tol),
+            : tolerance(tol),
               aux({in...})
     {
         provided_function = func;
-        num_parameters = (int) lower_bound.size();
+        num_parameters = (int) lower.size();
+        if (num_parameters!= upper.size()){
+            std::cout << "Boundary size mismatch! Exiting" << endl;
+            exit(1);
+        }
+        lower_bound.resize(lower.size());
+        upper_bound.resize(upper.size());
+
+        for (int i = 0; i < num_parameters; i++){
+            lower_bound(i) = lower(i);
+            upper_bound(i) = upper(i);
+        }
+
         id = -1;
         name = "";
-        threads = -1;
-
     };
-    typedef std::function<double(objective_function &, Tensor<double, 3> &)> providedType ;
+
+
+
+    typedef std::function<double(objective_function &, ArrayXd &)> providedType ;
     providedType provided_function;
 
-    double fitness(Tensor<double, 3> &parameters){
-//        double H = provided_function(*this, parameters);
-//        if (isinf(H)){H = 1e20;}
-//        if (isnan(H)){H = 1e20;}
-//        return (double)(-1.0 / log(H + EMC_constants::log_param) + EMC_constants::log_const + pow(log( 1/(H + 1)), 2));
+    double fitness(ArrayXd &parameters){
         return provided_function(*this, parameters);
     }
 
     int id; // Optional: An id for use in parallel (MPI) computations, when this lib is used elsewhere.
     string name;
-    int threads; //Optional: Specify number of threads;
-    Tensor<double,3> lower_bound;
-    Tensor<double,3> upper_bound;
-//    Array<double,Dynamic, Dynamic> lower_bound; //Minimum allowed values for each fitting parameter
-//    Array<double,Dynamic, Dynamic> upper_bound; //Maximum allowed values for each fitting parameter
+    ArrayXd lower_bound; //Minimum allowed values for each fitting parameter
+    ArrayXd upper_bound; //Maximum allowed values for each fitting parameter
     double tolerance;                           //If the fitness saturates within tolerance, the program terminates
-    Tensor<double ,3> optimum;
+    ArrayXd optimum;
     int num_parameters;
     std::vector<Array<double,Dynamic,Dynamic>>  aux; //Auxiliary data or vectors for use in the fitness function
-//    typedef std::function<outputType(objective_function &, inputType &)> fitnessType ;
-
 
 };
 

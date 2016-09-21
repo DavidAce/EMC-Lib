@@ -37,19 +37,8 @@ void DNA::flip_loci(const int a) {
     int gene = a / geneLength;
     int locus = a%geneLength;
     chromosomes[gene][geneLength - locus - 1]  =  !chromosomes[gene][geneLength - locus - 1];
-//    chromosomes[gene].flip(geneLength - locus - 1);
 }
 
-//void DNA::flip_loci(Ref<ArrayXi> loci) {
-//	//Flip all bits in array loci
-//	int gene;// = a / geneLength;
-//	int locus;// = a%geneLength;
-//	for (int i = 0; i < loci.size(); i++) {
-//		gene = loci(i)/geneLength;
-//		locus = loci(i) % geneLength;
-//		chromosomes[gene].flip(geneLength - locus - 1);
-//	}
-//}
 
 void DNA::flip_loci(ArrayXi &loci) {
     //Flip all bits in array loci
@@ -58,7 +47,6 @@ void DNA::flip_loci(ArrayXi &loci) {
     for (int i = 0; i < loci.size(); i++) {
         gene = loci(i)/geneLength;
         locus = loci(i) % geneLength;
-//		chromosomes[gene].flip(geneLength - locus - 1);
         chromosomes[gene][geneLength - locus - 1]  =  !chromosomes[gene][geneLength - locus - 1];
 
     }
@@ -90,38 +78,28 @@ void DNA::set_parameter(const int i, const double p) {
 }
 
 void DNA::update_parameters() {
-//    cout << "Updating " << nGenes << " genes with " << parameters.transpose()  <<endl;
-//    cout << "Old parameters = " << parameters.transpose() << " ";
     for (int i = 0; i < nGenes; i++) {
         parameters(i) = bin2dec(i);
     }
-//    cout << "New parameters = " << parameters.transpose() << endl;
-
 }
 
-void DNA::set_parameters(const  Array<double,Dynamic,1> &p) {
-    //Set all parameters at once with an ArrayXd
-
+void DNA::update_chromosomes() {
     for (int i = 0; i < nGenes; i++) {
-        parameters(i) = p(i);
         chromosomes[i] = dec2bin(i);
     }
 }
 
-void DNA::set_parameters(const  Tensor<double,3> &p) {
+void DNA::set_parameters(const  ArrayXd &p) {
     //Set all parameters at once with an ArrayXd
     for (int i = 0; i < nGenes; i++) {
         parameters(i) = p(i);
         chromosomes[i] = dec2bin(i);
     }
 }
+
 
 
 void DNA::randomize_dna(){
-    chromosomes.resize((unsigned int)nGenes);
-    parameters.resize(obj_fun.lower_bound.dimension(0),
-                      obj_fun.lower_bound.dimension(1),
-                      obj_fun.lower_bound.dimension(2));
     for (int i = 0; i < nGenes; i++) {
         parameters(i) = uniform_double(obj_fun.lower_bound(i), obj_fun.upper_bound(i));
         chromosomes[i] = dec2bin(i);

@@ -8,6 +8,7 @@
 #include <iostream>
 #include <iomanip>
 #include <time.h>
+#include <thread>
 #include <Eigen/Dense>
 #include <Eigen/Core>
 #include <Eigen/Geometry>
@@ -15,7 +16,6 @@
 #include "randomFunctions.hpp"
 #include "mymath.hpp"
 #include "population.hpp"
-#include "species.hpp"
 #include "objective_function.hpp"
 using namespace std;
 using namespace Eigen;
@@ -25,16 +25,8 @@ class population;	//Forward declaration
 class personality;	//Forward declaration
 
 extern void evolve (population &);
-extern void find_lowest_guy(const vector<personality> &guys, double &lowest_H, unsigned int &lowest_i );
-extern void find_lowest_guy_excluding(const vector<personality> &guys, double &lowest_H, unsigned int &lowest_i, std::set<unsigned int> &excluded );
 extern void exchange(population &);
-extern void migration(species &);
-extern void insertguy(population &, int , int );
-extern void find_elite(population &);
-
-extern void roulette_select(const vector<personality> &guys, Array2i &selected, double &Z, double lowest_H  );
-extern void bitselector_smartCopy(population &, Array2i &selected, Array4i &, Array4i &);
-
+extern void bitselector_smartCopy(population &, Array4i &, Array4i &);
 extern void mutation            (population &);
 extern void mutation_elite      (population &);
 extern void crossover           (population &);

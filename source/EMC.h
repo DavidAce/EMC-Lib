@@ -12,10 +12,10 @@
 #include <chrono>
 #include "constants.hpp"
 #include "randomFunctions.hpp"
-#include "species.hpp"
 #include "evolution.hpp"
 #include "population.hpp"
 #include "objective_function.hpp"
+#include "parallel_algorithms.h"
 using namespace Eigen;
 using namespace std;
 using namespace std::chrono;

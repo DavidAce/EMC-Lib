@@ -19,35 +19,136 @@ void population::getFitness(personality& guy){
 	guy.H = obj_fun.fitness(guy.genome.parameters);
 }
 
-void population::getFitness(const Tensor<double, 3> &p, personality &guy){
+
+void population::getFitness(const ArrayXd &p, personality &guy){
     //Set all parameters at once with an ArrayXd
     guy.genome.set_parameters(p);
     guy.H = obj_fun.fitness(guy.genome.parameters);
 }
 
-void population::getFitness(const Array<double, Dynamic,1> &p, personality &guy){
-    //Set all parameters at once with an ArrayXd
-    guy.genome.set_parameters(p);
-    guy.H = obj_fun.fitness(guy.genome.parameters);
+
+
+void population::find_lowest_guy(){
+    lowest_H = guys[0].H;
+    lowest_i = 0;
+    for (unsigned int i = 0; i < guys.size(); i++){
+        if (guys[i].H < lowest_H){
+            lowest_H = guys[i].H;
+            lowest_i = i;
+        }
+    }
+}
+
+void population::find_lowest_guy_excluding(std::set<unsigned int> &excluded){
+    lowest_H = guys[0].H;
+    lowest_i = 0;
+    for (unsigned int i = 0; i < guys.size(); i++){
+        if (excluded.find(i) != excluded.end()) { continue; }
+        if (guys[i].H < lowest_H){
+            lowest_H = guys[i].H;
+            lowest_i = i;
+        }
+    }
+}
+
+void population::insertguy(int from, int to) {
+    //Push out the worst bestguy and move everybody up until "to"
+    for (int i = 0; i < to; i++) {
+        copy(bestguys[i], bestguys[i + 1]);
+    }
+    //Insert the exceptional guy into the illustrious group of best guys
+    copy(bestguys[to], guys[from]);
+}
+
+void population::find_elite() {
+    //Here we attempt to find someone better in guys that is better than any guy in best_guys
+    std::set<unsigned int> tried_guys;
+    int j = 0; //Counts how many have been tried
+    while (j < N_best) {
+        find_lowest_guy_excluding(tried_guys);
+        tried_guys.insert(lowest_i);
+        j++;
+        //By now we should have a winner, check if he's better than any elite
+        //We have already tried to match j guys, so we can start from j?
+        for (unsigned int i = N_best ;  i-- > 0;) {
+            if (lowest_H < bestguys[i].H) {
+                insertguy(lowest_i, i);
+                break;
+            }
+        }
+
+    }
 }
 
 
-//void population::getFitness4All(){
-//        for (int i = 0; i < N; i++) {
-//            cout << "Getting fitness for guy " << i << " from parameters: " << guys[i].genome.parameters.transpose() << endl;
-//            guys[i].H = obj_fun.fitness(guys[i].genome.parameters);
-//		}
-//    }
+void population::roulette_select_two_guys(double &Z) {
+    //Selected 0 is the guy with good fitness (lowest), selected 1 is random
+    Array<double, N, 1> roulette;
+    double lucky_number;
+    //Start by finding the best guy in the list
+    find_lowest_guy();
+    Z = 0;
+    for (int i = 0; i < N; i++) {
+        Z += exp(-(guys[i].H - lowest_H));
+        roulette(i) = Z; //Cumulative sum - Low fitness gives large area on roulette
+    }
+    lucky_number = uniform_double( (double) 0.0 , Z);
+    for (int i = 0; i < N; i++) {
+        if (lucky_number <= roulette(i)) {
+            selected(0) = i;
+            break;
+        }
+    }
+    selected(1) = selected(0);
+    while (selected(1) == selected(0)) {
+        selected(1) = uniform_integer( 0, N - 1);
+    }
+}
 
-//void population::wakeUpPop(){
-////	wakeUpGuys();
-////	getFitness4All();
-//	//Wake up newguys by copying the old guys
-//	for (int i = 0; i < N; i++) {
-//		copy(newguys[i], guys[i]);
-//	}
-//	wakeUpBest();
-//}
+void population::roulette_select_two_guys() {
+    //Selected 0 is the guy with good fitness (lowest), selected 1 is random
+    Array<double, N, 1> roulette;
+    double lucky_number;
+    //Start by finding the best guy in the list
+    find_lowest_guy();
+    double Z = 0;
+    for (int i = 0; i < N; i++) {
+        Z += exp(-(guys[i].H - lowest_H));
+        roulette(i) = Z; //Cumulative sum - Low fitness gives large area on roulette
+    }
+    lucky_number = uniform_double( (double) 0.0 , Z);
+    for (int i = 0; i < N; i++) {
+        if (lucky_number <= roulette(i)) {
+            selected(0) = i;
+            break;
+        }
+    }
+    selected(1) = selected(0);
+    while (selected(1) == selected(0)) {
+        selected(1) = uniform_integer( 0, N - 1);
+    }
+}
+
+
+int population::roulette_select_one_guy() {
+    //Selected 0 is the guy with good fitness (lowest), selected 1 is random
+    Array<double, N, 1> roulette;
+    double lucky_number;
+    //Start by finding the best guy in the list
+    find_lowest_guy();
+    double Z = 0;
+    for (int i = 0; i < N; i++) {
+        Z += exp(-(guys[i].H - lowest_H));
+        roulette(i) = Z; //Cumulative sum - Low fitness gives large area on roulette
+    }
+    lucky_number = uniform_double( (double) 0.0 , Z);
+    for (int i = 0; i < N; i++) {
+        if (lucky_number <= roulette(i)) {
+            return i;
+        }
+    }
+}
+
 
 void population::wakeUpNewGuys(){
     for (int i = 0; i < N; i++) {
@@ -92,9 +193,47 @@ void population::wakeUpBest() {
 
 }
 
+ArrayXd population::local_champion_parameters(){
+    double champion_H = bestguys[0].H;
+    int    champion_i = 0;
+    for (unsigned int i = 0; i < bestguys.size(); i++){
+        if (bestguys[i].H < champion_H){
+            champion_H = bestguys[i].H;
+            champion_i = i;
+        }
+    }
+    return bestguys[champion_i].genome.parameters;
+
+}
+double population::local_champion_fitness(){
+    double champion_H = bestguys[0].H;
+    int    champion_i = 0;
+    for (unsigned int i = 0; i < bestguys.size(); i++){
+        if (bestguys[i].H < champion_H){
+            champion_H = bestguys[i].H;
+            champion_i = i;
+        }
+    }
+    return bestguys[champion_i].H;
+
+}
+
+int population::local_champion_index(){
+    double champion_H = bestguys[0].H;
+    int    champion_i = 0;
+    for (unsigned int i = 0; i < bestguys.size(); i++){
+        if (bestguys[i].H < champion_H){
+            champion_H = bestguys[i].H;
+            champion_i = i;
+        }
+    }
+    return champion_i;
+
+}
+
+
 
 void population::copy(personality &destination, const personality &source) {
-	//destination.born				= source.born;
 	destination.H					= source.H;
 	destination.t					= source.t;
 	destination.genome.parameters	= source.genome.parameters;
@@ -105,8 +244,6 @@ void population::copy(personality &destination, const personality &source) {
 
 void population::copy(DNA &destination, const DNA &source) {
 	destination.chromosomes  = source.chromosomes;
-
-	// std::copy(destination.chromosomes, destination.chromosomes + nGenes, source.chromosomes);
 }
 
 

@@ -23,8 +23,8 @@ using namespace Eigen;
 class paramLine{
 	private:
         objective_function &obj_fun;
-        Array<double,Dynamic,1>  o;
-        Array<double,Dynamic,1>  d;
+        ArrayXd  o;
+        ArrayXd  d;
 	public:
 		paramLine(objective_function &ref)
                 :obj_fun(ref){
@@ -32,36 +32,23 @@ class paramLine{
             d.resize(nGenes);
         };
 		//Always use "Through" first, to set "o" and "d".
-		void Through(Tensor<double,3> &p1, Tensor<double,3>  &p2){ //Points in parameter space p1 and p2
-            for(int i = 0;i < nGenes; i++){
-				o(i) = p1(i);
-				d(i) = p2(i) - p1(i);
-			}
+		void Through(ArrayXd &p1, ArrayXd  &p2){ //Points in parameter space p1 and p2
+//            cout << "p1 size = " << p1.size() << endl;
+            o = p1;
+            d = p2-p1;
 		}
-        template<typename type>
-        Array<type,Dynamic,1>  pointAt(const type r){
-            Array<type,Dynamic,1>  v(nGenes);
-			for(int i = 0;i < nGenes; i++){
-				v(i) = o(i)+d(i)*r;
-			}
-			return v;
+        ArrayXd  pointAt(const double r){
+            return o + d*r;
 		}
-        ArrayXd subtract(double t[],  double a[]){
-            ArrayXd result(nGenes);
-            for (int i = 0; i < nGenes ; i++){
-                result (i) = (int) ( t[i] - a[i]);
-            }
-            return result;
-        }
-//		double distance(Tensor<double,Dynamic> &p1, Tensor<double,Dynamic>  &p2){
-//			return sqrt((p2.cast<double>()-p1.cast<double>()).square().sum());
-//		}
 		double line_max() { //Get the largest r within upper boundary Bu and lower boundary Bl
-            return  subtract(obj_fun.upper_bound.data(), o.data()).cast<double>().cwiseQuotient(d.cast<double>()).minCoeff();
-//            return (obj_fun.upper_bound.cast<double>() - o).cwiseQuotient(d).minCoeff();
-		}
+//            cout << obj_fun.upper_bound.size() << endl;
+//            cout << o.size() << endl;
+            return (obj_fun.upper_bound - o).cwiseQuotient(d).minCoeff();
+        }
 	    double line_min() { //Get the largest r within upper boundary Bu and lower boundary Bl
-		    return  -subtract(obj_fun.lower_bound.data(), o.data()).cast<double>().cwiseQuotient((-d.cast<double>()).eval()).minCoeff();
+//            cout << obj_fun.lower_bound.size() << endl;
+//            cout << o.size() << endl;
+		    return -(obj_fun.lower_bound - o).cwiseQuotient(-d).minCoeff();
 	    }
 };
 
@@ -69,9 +56,22 @@ class paramLine{
 typedef std::chrono::high_resolution_clock Clock;
 class counters {
 public:
+    counters(){
+        generation          = 0;
+        timer_migration     = 0;
+        timer_store_best    = 0;
+        timer_print_progress= 0;
+        timer_check_conv    = 0;
+        simulation_time     = 0;
+        evolution_time      = 0;
+    }
 	int store_counter;
 	int store_last_since;
 	int generation;
+    int timer_migration;
+    int timer_store_best;
+    int timer_check_conv;
+    int timer_print_progress;
 	double simulation_time;
 	Clock::time_point simulation_tic;
 	Clock::time_point simulation_toc;
@@ -89,7 +89,6 @@ private:
 	void wakeUpGuys();
 	void wakeUpNewGuys();
 	void wakeUpBest();
-	objective_function &obj_fun;
 public:
 	population(objective_function &ref)
 			:obj_fun        (ref),
@@ -97,31 +96,41 @@ public:
 			 newguys        (N,ref),
 			 bestguys       (N_best,ref),
 			 snookerGuys    (r_num,ref),
-             line           (ref),
-			 generation(0)
-	{
+             line           (ref)
+    {
                 wakeUpGuys();
                 wakeUpNewGuys();
                 wakeUpBest();
-//		wakeUpPop();
     };
+    objective_function &obj_fun;
     vector<personality> guys; 			     //Make an array of N guys
 	vector<personality> newguys; 			 //Make a temporary array of N guinneapigs
 	vector<personality> bestguys;            //Make an array of N/10 good performers
 	vector<personality> snookerGuys;         // (r_num, personality(true));//Make an array of r_num snooker guys
 
     paramLine line;	//for doing the snooker crossover
-    int generation;  //Number of generations for this population
-	counters count;
+	double lowest_H;
+    unsigned int    lowest_i;
+    Array2i selected;
 
+    counters count;
+    int world_ID;     //Numbers for MPI communication
+    int world_size;   //Numbers for MPI communication
     void getFitness(personality &guy);
-    void getFitness(const Array<double,Dynamic,1>  &point, personality &guy);
-    void getFitness(const Tensor<double,3> &point, personality &guy);
-
+    void getFitness(const ArrayXd  &point, personality &guy);
     void copy(personality &destination, const personality & source);
     void copy(DNA& destination, const DNA& source);
+    void find_lowest_guy();
 
-
+    void find_lowest_guy_excluding(std::set<unsigned int> &excluded);
+    void insertguy(int from, int to);
+    void find_elite();
+    void roulette_select_two_guys(double &Z);
+    void roulette_select_two_guys();
+    int  roulette_select_one_guy();
+    ArrayXd local_champion_parameters();
+    double  local_champion_fitness();
+    int     local_champion_index();
 	int operator()() { //Return the bit at a.
 		return 0;
 	}
