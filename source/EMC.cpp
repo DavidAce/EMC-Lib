@@ -25,9 +25,13 @@ void minimize(objective_function & obj_fun){
 	pop.count.simulation_tic = high_resolution_clock::now();
     rng.seed((unsigned long int) pop.world_ID);
     while (pop.count.generation < EMC_constants::max_generations &&  !champions.converged(pop)) {
+//        cout << "ID: " << pop.world_ID << " Migration" << " Generation = " << pop.count.generation<< endl;
         migration(pop);
+//        cout << "ID: " << pop.world_ID << " evolution"<< " Generation = " << pop.count.generation << endl;
         evolve(pop); 			//Evolve all the populations
+//        cout << "ID: " << pop.world_ID << " Storing"<<  " Generation = " << pop.count.generation << endl;
         champions.store_champion(pop);
+//        cout << "ID: " << pop.world_ID << " Printing"<< " Generation = " << pop.count.generation << endl;
         champions.print_progress(pop);
 	}
     //Print final results

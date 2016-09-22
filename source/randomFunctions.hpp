@@ -1,6 +1,7 @@
 #ifndef RANDOMFUNCTIONS_HPP   // if x.h hasn't been included yet
 #define RANDOMFUNCTIONS_HPP   //  #define this so the compiler knows it has been included
 #include <random>
+#include <iostream>
 #include "constants.hpp"
 
 namespace EMC_rnd{
@@ -39,6 +40,8 @@ namespace EMC_rnd{
         inType1 ll = fminl(lowerLimit, upperLimit);
         inType1 number;
         while (true) {
+//            std::cout << "low: "<< lowerLimit << " high: " << upperLimit << " mean: " << mean << " std: "<< std << endl;
+
             number = distribution(rng);
             if (number >= ll && number <= ul) {
                 return number;

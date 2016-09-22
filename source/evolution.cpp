@@ -423,7 +423,8 @@ void crossover_snooker(population &pop) {
 										fmin(r_min, r_max),
 										fmax(r_min, r_max),
 										1.0,
-										0.5);
+                                        0.5);
+//										0.5*fmax(r_min,r_max));
 		pop.snookerGuys[i].genome.set_parameters(pop.line.pointAt(r_point(i)));
 		pop.getFitness(pop.line.pointAt(r_point(i)), pop.snookerGuys[i]);
 		pop.snookerGuys[i].t = pop.guys[pop.selected(0)].t;
@@ -439,8 +440,8 @@ void crossover_snooker(population &pop) {
 			lowest_i = i;
         }
     }
-	double dH = pop.snookerGuys[lowest_i].H - pop.guys[pop.selected(0)].H;
-	if (uniform_double_1() < exp(-dH/pop.guys[pop.selected(0)].t)){
+	double dH = pop.snookerGuys[lowest_i].H - pop.guys[pop.selected(1)].H;
+	if (uniform_double_1() < exp(-dH/pop.guys[pop.selected(1)].t)){
 		pop.guys[pop.selected(1)].genome.set_parameters(pop.snookerGuys[lowest_i].genome.parameters); //Copy his shit
 		pop.guys[pop.selected(1)].H 	= pop.snookerGuys[lowest_i].H;
 		pop.guys[pop.selected(1)].born 	= pop.count.generation;

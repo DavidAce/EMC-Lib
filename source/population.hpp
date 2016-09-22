@@ -42,8 +42,8 @@ public:
             o = p1;
             d = p2-p1;
             distance_to_boundaries << (obj_fun.upper_bound - o).cwiseQuotient(d), (obj_fun.lower_bound - o).cwiseQuotient(d);
-            line_max = (distance_to_boundaries < 0).select(distance_to_boundaries.maxCoeff() + 1,  distance_to_boundaries).minCoeff();
-            line_min = (distance_to_boundaries > 0).select(distance_to_boundaries.minCoeff() - 1,  distance_to_boundaries).maxCoeff();
+            line_max = (distance_to_boundaries <= 0).select(distance_to_boundaries.maxCoeff() + 1,  distance_to_boundaries).minCoeff();
+            line_min = (distance_to_boundaries >= 0).select(distance_to_boundaries.minCoeff() - 1,  distance_to_boundaries).maxCoeff();
 
         }
         ArrayXd  pointAt(const double r){
