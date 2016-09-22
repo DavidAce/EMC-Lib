@@ -1,29 +1,17 @@
 #!/bin/bash
-
-# trap ctrl-c and call ctrl_c()
-trap ctrl_c INT
-
-function ctrl_c() {
-        echo "  **  Trapped CTRL-C"
-}
-
+option=$1
 echo "Starting job"
-
-if [[ "$@" == *"valgrind"* ]]
+option=$1
+if [[ "$HOSTNAME" == *"triolith"* ]]
 then
-    valgrind --tool=memcheck --leak-check=full -v ./build/Debug/EMC
-elif [[ "$@" == *"gdb"* ]]
-then
-    gdb ./build/Debug/EMC
-elif [[ "$@" == *"ebug"* ]]
-then
-    ulimit -c unlimited
-   ./build/Debug/EMC
-elif [[ "$@" == *"elease"* ]]
-then
-    build/Release/EMC
+    echo "We're on triolith!";
+    if [[ "${option}" == *"valgrind"* ]]
+    then
+        sbatch run_triolith_debug.sh
+    else
+        sbatch run_triolith.sh
+    fi
 else
-    build/Release/EMC
+    echo "We're on my pc!"
+    ./run_my_pc.sh ${option}
 fi
-
-echo "Finished Job"
