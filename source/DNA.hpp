@@ -25,8 +25,8 @@ private:
     bitset<maxbits> dec2bin(const int);
 
 //	vector<bool> dec2bin(const int);
-    objective_function &obj_fun;
     void randomize_dna();
+    void copy_initial_conditions();
 //    Array<long double, Dynamic,1>   random_parameters();
 //    vector< bitset<maxbits> >       random_chromosomes();
 
@@ -41,7 +41,12 @@ public:
         EMC_constants::genomeLength = EMC_constants::nGenes * EMC_constants::geneLength;
         chromosomes.resize((unsigned int)nGenes);
         parameters.resize ((unsigned int)nGenes);
-        randomize_dna();
+        if (obj_fun.initial_conditions_passed){
+            copy_initial_conditions();
+        }else{
+            randomize_dna();
+
+        }
     }
 
     DNA(objective_function &ref, bool ):obj_fun(ref) {
@@ -51,6 +56,7 @@ public:
         chromosomes.resize((unsigned int)nGenes);
         parameters.resize ((unsigned int)nGenes);
     }
+    objective_function &obj_fun;
 
     ArrayXd parameters;
 //    Array<long double, Dynamic ,1> parameters;						  //Decimal representation

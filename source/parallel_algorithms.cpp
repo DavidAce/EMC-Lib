@@ -114,7 +114,8 @@ void hall_of_fame::print_final_result(population &pop){
     if (pop.world_ID == 0){
         if (pop.obj_fun.id >= 0){cout << "ID: " << pop.obj_fun.id << " "<< pop.obj_fun.name << " ";}
         cout << "Best Parameters give H = : "
-             << champion_fitness  ;
+             << champion_fitness
+             << endl;
     }
 
 }

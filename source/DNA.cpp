@@ -106,5 +106,12 @@ void DNA::randomize_dna(){
     }
 }
 
+void DNA::copy_initial_conditions(){
+    for (int i = 0; i < nGenes; i++) {
+        parameters(i) = obj_fun.initial(i);
+        chromosomes[i] = dec2bin(i);
+    }
+}
+
 
 
