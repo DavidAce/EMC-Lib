@@ -73,7 +73,6 @@ inline void bitselector_smartCopy(population &pop, Array4i &n_ab_XY, Array4i &n_
 	//n_ab_YX(2): n_21 = newguys: DIFF | guys: SAME
 	//n_ab_YX(3): n_22 = newguys: DIFF | guys: DIFF
 	
-	//#pragma omp parallel for 
 	for (int i = 0; i < genomeLength; i++) {
 		if (pop.guys[pop.selected(0)].genome(i) == pop.guys[pop.selected(1)].genome(i)) {
 			//If parents loci are the same: Copy the values
@@ -88,15 +87,11 @@ inline void bitselector_smartCopy(population &pop, Array4i &n_ab_XY, Array4i &n_
 			}
 
 			if (pop.newguys[pop.selected(0)].genome(i) == pop.newguys[pop.selected(1)].genome(i)) {
-				//#pragma omp atomic
 				n_ab_XY(0)++; //Offsprings have identical bit
-				//#pragma omp atomic
 				n_ab_YX(0)++; //Parents have identical bit
 			}
 			else {
-				//#pragma omp atomic
 				n_ab_XY(1)++; //Offsprings have different bit
-				//#pragma omp atomic
 				n_ab_YX(2)++; //Parents have different bit
 			}
 
@@ -115,15 +110,11 @@ inline void bitselector_smartCopy(population &pop, Array4i &n_ab_XY, Array4i &n_
 			}
 
 			if (pop.newguys[pop.selected(0)].genome(i) == pop.newguys[pop.selected(1)].genome(i)) {
-				//#pragma omp atomic
 				n_ab_XY(2)++; //Offsprings have identical bit
-				//#pragma omp atomic
 				n_ab_YX(1)++; //Offsprings have identical bit
 			}
 			else {
-				//#pragma omp atomic
 				n_ab_XY(3)++; //Offsprings have different bit
-				//#pragma omp atomic
 				n_ab_YX(3)++; //Parents have different bit
 
 			}
@@ -136,7 +127,6 @@ void mutation(population &pop) {
 	int mutantGenes;	//Number of points to mutate
 	int mutant;			//Which guy to mutate
 	double dH;
-	//#pragma omp parallel for private(mutantGenes, mutant,dH)
 	for (int i = 0; i < N; i++) {
 		mutantGenes =  uniform_integer( 1, genomeLength - 1);
 		ArrayXi loci(mutantGenes);
@@ -166,7 +156,6 @@ void mutation_elite(population &pop) {
 	int mutant;			//which guy to mutate
 	int elite_mutant;	//Which elite guy to receive wisdom from
 	double dH;
-	//#pragma omp parallel for private( mutant, elite_mutant,dH)
 	for (int i = 0; i < N; i++) {
 		//mutantGenes = 1;// uniform_integer( 1, genomeLength - 1);
 		int loci = uniform_integer( 1, genomeLength - 1);
@@ -188,7 +177,6 @@ void mutation_elite(population &pop) {
 			//Revert changes in newguys, i.e sync them for the next round
 			pop.copy(pop.newguys[mutant], pop.guys[mutant]);
 		}
-
 	}
 }
 
@@ -247,14 +235,6 @@ void crossover(population &pop) {
 			pop.copy(pop.newguys[pop.selected(0)], pop.guys[pop.selected(0)]);
 			pop.copy(pop.newguys[pop.selected(1)], pop.guys[pop.selected(1)]);
 		}
-		//Make sure newguys are up to speed on newest events
-
-		
-
-		
-	/*	cout << "Parameters 0:	" << pop.guys[pop.selected(0)].genome.parameters.transpose() << endl;
-		cout << "Parameters 1:	" << pop.guys[pop.selected(1)].genome.parameters.transpose() << endl;
-		getchar();*/
 	}
 }
 
@@ -428,8 +408,8 @@ void crossover_snooker(population &pop) {
 	//Distance in terms of r between guys
 	//Vary r to find the walls of the parameter domain
 
-    double r_max = pop.line.line_max();
-    double r_min = pop.line.line_min();
+    double r_max = pop.line.line_max;
+    double r_min = pop.line.line_min;
 	ArrayXd r_point(r_num);
     if( isinf(r_min) || isinf(r_max)){
         return;
@@ -448,6 +428,8 @@ void crossover_snooker(population &pop) {
 		pop.getFitness(pop.line.pointAt(r_point(i)), pop.snookerGuys[i]);
 		pop.snookerGuys[i].t = pop.guys[pop.selected(0)].t;
 	}
+
+
     //Accept or reject
 	double lowest_H = pop.snookerGuys[0].H;
 	int    lowest_i = 0;
@@ -459,10 +441,11 @@ void crossover_snooker(population &pop) {
     }
 	double dH = pop.snookerGuys[lowest_i].H - pop.guys[pop.selected(0)].H;
 	if (uniform_double_1() < exp(-dH/pop.guys[pop.selected(0)].t)){
-		pop.guys[pop.selected(0)].genome.set_parameters(pop.snookerGuys[lowest_i].genome.parameters); //Copy his shit
-		pop.guys[pop.selected(0)].H 	= pop.snookerGuys[lowest_i].H;
-		pop.guys[pop.selected(0)].born 	= pop.count.generation;
+		pop.guys[pop.selected(1)].genome.set_parameters(pop.snookerGuys[lowest_i].genome.parameters); //Copy his shit
+		pop.guys[pop.selected(1)].H 	= pop.snookerGuys[lowest_i].H;
+		pop.guys[pop.selected(1)].born 	= pop.count.generation;
 	}
+
 
 
 

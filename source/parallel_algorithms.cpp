@@ -104,6 +104,7 @@ void hall_of_fame::print_progress(population &pop) {
             cout << "Generation... " << setw(7) << pop.count.generation
                  << " | Current Best: " << setw(22) << champion_fitness
                  << " | diff: "         << setw(22) << latest_history_diff
+//                 << endl << champion_parameters.transpose()
                  << endl << flush;
         }
     }

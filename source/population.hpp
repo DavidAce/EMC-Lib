@@ -23,33 +23,38 @@ using namespace Eigen;
 class paramLine{
 	private:
         objective_function &obj_fun;
-        ArrayXd  o;
+        ArrayXd  o; //
         ArrayXd  d;
-	public:
+        ArrayXd distance_to_boundaries;
+
+public:
 		paramLine(objective_function &ref)
                 :obj_fun(ref){
             o.resize(nGenes);
             d.resize(nGenes);
+            distance_to_boundaries.resize(2*nGenes);
+
         };
+        double line_min;
+        double line_max;
 		//Always use "Through" first, to set "o" and "d".
 		void Through(ArrayXd &p1, ArrayXd  &p2){ //Points in parameter space p1 and p2
-//            cout << "p1 size = " << p1.size() << endl;
             o = p1;
             d = p2-p1;
-		}
+            distance_to_boundaries << (obj_fun.upper_bound - o).cwiseQuotient(d), (obj_fun.lower_bound - o).cwiseQuotient(d);
+            line_max = (distance_to_boundaries < 0).select(distance_to_boundaries.maxCoeff() + 1,  distance_to_boundaries).minCoeff();
+            line_min = (distance_to_boundaries > 0).select(distance_to_boundaries.minCoeff() - 1,  distance_to_boundaries).maxCoeff();
+
+        }
         ArrayXd  pointAt(const double r){
             return o + d*r;
 		}
-		double line_max() { //Get the largest r within upper boundary Bu and lower boundary Bl
-//            cout << obj_fun.upper_bound.size() << endl;
-//            cout << o.size() << endl;
-            return (obj_fun.upper_bound - o).cwiseQuotient(d).minCoeff();
-        }
-	    double line_min() { //Get the largest r within upper boundary Bu and lower boundary Bl
-//            cout << obj_fun.lower_bound.size() << endl;
-//            cout << o.size() << endl;
-		    return -(obj_fun.lower_bound - o).cwiseQuotient(-d).minCoeff();
-	    }
+//		double line_max() {
+//            return (obj_fun.upper_bound - o).cwiseQuotient(d).minCoeff();
+//        }
+//	    double line_min() { //Get the largest r within upper boundary
+//		    return -(obj_fun.lower_bound - o).cwiseQuotient(-d).minCoeff();
+//	    }
 };
 
 
