@@ -411,7 +411,7 @@ void crossover_snooker(population &pop) {
     double r_max = pop.line.line_max;
     double r_min = pop.line.line_min;
 	ArrayXd r_point(r_num);
-    if( isinf(r_min) || isinf(r_max)){
+    if( std::isinf(r_min) || std::isinf(r_max)){
         return;
     }
     if( r_min * r_max > 0){
