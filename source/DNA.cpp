@@ -11,9 +11,10 @@ using namespace Eigen;
 std::ostream &operator<<(std::ostream &os, DNA const &genome) {
     for (int i = 0; i < nGenes; i++) {
 //		os << genome.chromosomes[i] << endl;
-        for (size_t nIndex = 0; nIndex < genome.chromosomes[i].size (); ++ nIndex) {
+        for (unsigned int nIndex = genome.chromosomes[i].size(); nIndex-- > 0; ) {
             os << genome.chromosomes[i][nIndex];
         }
+        os << " " << setprecision(17) << fixed << showpoint << right <<setw(21)  <<genome.parameters(i) << endl;
     }
     return os;
 }

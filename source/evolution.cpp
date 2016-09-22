@@ -404,6 +404,9 @@ void crossover_snooker(population &pop) {
 	//Notation from snooker crossover
 	//Choose 2 guys from pop
 	rndChoice(pop.selected.data(), 2, N - 1);
+    if (pop.guys[pop.selected(0)].H ==pop.guys[pop.selected(1)].H){
+        return;
+    }
 	pop.line.Through(pop.guys[pop.selected(0)].genome.parameters, pop.guys[pop.selected(1)].genome.parameters);
 	//Distance in terms of r between guys
 	//Vary r to find the walls of the parameter domain
@@ -412,12 +415,36 @@ void crossover_snooker(population &pop) {
     double r_min = pop.line.line_min;
 	ArrayXd r_point(r_num);
     if( std::isinf(r_min) || std::isinf(r_max)){
+        cout << "r are inf or nan!! " << endl;
+
         return;
     }
     if( r_min * r_max > 0){
+        cout << "r are equal!!! " << endl;
+
+        return;
+    }
+    if (r_min == r_max){
         return;
     }
 
+    if (fmin(r_min,r_max) > 0.0 ){
+        cout << "r_min too large!!! " << endl << endl;
+        exit(1);
+    }
+
+    if (fmax(r_min,r_max) < 1.0 ){
+        cout << "r_min too large!!! "<< endl << endl;
+        exit(1);
+
+
+    }
+    if (r_min == 0 || r_max == 0){
+        cout << "r are equal!!! " << endl;
+        exit(1);
+
+    }
+//    cout << "r_min = "    << r_min << " r_max = " << r_max << endl;
     for (int i = 0; i < r_num; i++) {
 		r_point(i) = gaussian_truncated(	//Create gaussians points centered around the good performer
 										fmin(r_min, r_max),

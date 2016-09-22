@@ -43,7 +43,7 @@ int main(){
     //This function takes arguments lower_bound, upper_bound, tolerance,
     //and then any number of auxiliary double arrays (ArrayXd or ArrayXXd) of any size.
     //These can be accessed from obj_fun.aux[0], obj_fun.aux[1] ... etc, in the same order as given
-    objective_function obj_fun(my_example_function,lower_bound, upper_bound,tolerance , ArrayXd::Zero(27),exampleData0,exampleData1);
+    objective_function obj_fun(my_example_function,lower_bound, upper_bound,tolerance , ArrayXd::Zero(0),exampleData0,exampleData1);
     obj_fun.id = 0;
     obj_fun.name = "Parabola | ";
     //Next we pass a function to minimize.
