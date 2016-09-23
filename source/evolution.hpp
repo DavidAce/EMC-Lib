@@ -29,6 +29,7 @@ extern void exchange(population &);
 extern void bitselector_smartCopy(population &, Array4i &, Array4i &);
 extern void mutation            (population &);
 extern void mutation_elite      (population &);
+extern void mutation_realspace  (population &);
 extern void crossover           (population &);
 extern void crossover_elite     (population &);
 extern void crossover_smartCopy (population &);

@@ -8,12 +8,10 @@ void evolve(population &pop) {
 	int dice;
 	//Select mutation or crossover
 	if (uniform_double_1() < qm) {
-        if (uniform_double_1() < qma) {
-			mutation_elite(pop);
-		}
-		else {
-			mutation(pop);
-		}
+		dice = uniform_integer(0,1);
+		if 		(dice == 0)	 {if(uniform_double_1() < qma){mutation_elite(pop); }else{mutation(pop);}}
+		else   				 { mutation_realspace(pop); }
+
 	}
 	else {
 		dice = uniform_integer(1, 2);
@@ -124,12 +122,12 @@ inline void bitselector_smartCopy(population &pop, Array4i &n_ab_XY, Array4i &n_
 }
 
 void mutation(population &pop) {
-	int mutantGenes;	//Number of points to mutate
 	int mutant;			//Which guy to mutate
+	int mutantGenes =  uniform_integer( 2, genomeLength - 1);//Number of points to mutate
+	ArrayXi loci(mutantGenes);
 	double dH;
 	for (int i = 0; i < N; i++) {
-		mutantGenes =  uniform_integer( 1, genomeLength - 1);
-		ArrayXi loci(mutantGenes);
+
 		mutant = i;// uniform_integer( 0, N - 1);
 		rndChoice(loci.data(), mutantGenes, genomeLength);				//Choose locus to mutate
 		pop.newguys[mutant].genome.flip_loci(loci);	                    //Flip bits
@@ -152,21 +150,25 @@ void mutation(population &pop) {
 }
 
 void mutation_elite(population &pop) {
-	//int mutantGenes;	//Number of points to mutate
+	int mutantGenes;	//Number of points to mutate
 	int mutant;			//which guy to mutate
 	int elite_mutant;	//Which elite guy to receive wisdom from
-	double dH;
+
+	double dH; 			//Fitness difference
+	ArrayXi loci(genomeLength);
+//	ArrayXi sub_loci(geneLength);
 	for (int i = 0; i < N; i++) {
-		//mutantGenes = 1;// uniform_integer( 1, genomeLength - 1);
-		int loci = uniform_integer( 1, genomeLength - 1);
-		mutant = i; //uniform_integer( 0, N - 1);
-		//Fill loci with mutantGenes genome points to be mutated
-		//Copy an elite guy to a new guy to be a guinnea pig
+		mutant = i;
 		elite_mutant = uniform_integer( 0, N_best - 1);
 		pop.copy(pop.newguys[mutant].genome, pop.bestguys[elite_mutant].genome);	//Copy DNA only!
-		pop.newguys[mutant].genome.flip_loci(loci);									//Flip bits	
+//		cout <<endl<< pop.newguys[mutant].genome << endl << endl;
+
+		mutantGenes =  uniform_integer( 0, genomeLength - 1);
+		rndChoice(loci.data(), mutantGenes, genomeLength);
+		pop.newguys[mutant].genome.flip_loci(loci.head(mutantGenes));
 		pop.getFitness(pop.newguys[mutant]);    									//Get Fitness score
-		
+//		cout << pop.newguys[mutant].genome << endl << endl <<  endl;
+
 		//Perform metropolis
 		dH = pop.newguys[mutant].H - pop.guys[mutant].H;		//used to decide if we accept the new guy or not.
 		if (dH < 0 || exp(-dH / pop.newguys[mutant].t) > uniform_double_1()) {
@@ -179,6 +181,45 @@ void mutation_elite(population &pop) {
 		}
 	}
 }
+
+
+
+void mutation_realspace(population &pop) {
+	int mutantGenes;	//Number of genes to mutate
+	int mutant;			//which guy to mutate
+	int elite_mutant;	//Which elite guy to receive wisdom from
+
+	double dH; 			//Fitness difference
+	ArrayXi mutantParameters(nGenes);
+	for (int i = 0; i < N; i++) {
+		mutant = i;
+		elite_mutant = uniform_integer( 0, N_best - 1);
+		pop.copy(pop.newguys[mutant].genome, pop.bestguys[elite_mutant].genome);	//Copy DNA only!
+		mutantGenes =  uniform_integer( 1, max(1,nGenes/4));
+		rndChoice(mutantParameters.data(), mutantGenes, nGenes);
+		for (int j = 0; j < mutantGenes ; j++){
+			int k = mutantParameters(j);
+			pop.newguys[mutant].genome.parameters(k) = EMC_rnd::gaussian_truncated(pop.obj_fun.lower_bound(k),
+																				   pop.obj_fun.upper_bound(k),
+																				   pop.newguys[mutant].genome.parameters(k),
+																				   pop.obj_fun.tolerance*fabs(pop.obj_fun.upper_bound(k) - pop.obj_fun.lower_bound(k)));
+		}
+		pop.newguys[mutant].genome.update_chromosomes();
+		pop.getFitness(pop.newguys[mutant]);    									//Get Fitness score
+
+		//Perform metropolis
+		dH = pop.newguys[mutant].H - pop.guys[mutant].H;		//used to decide if we accept the new guy or not.
+		if (dH < 0 || exp(-dH / pop.newguys[mutant].t) > uniform_double_1()) {
+			pop.newguys[mutant].born = pop.count.generation;
+			pop.copy(pop.guys[mutant], pop.newguys[mutant]);
+		}
+		else {
+			//Revert changes in newguys, i.e sync them for the next round
+			pop.copy(pop.newguys[mutant], pop.guys[mutant]);
+		}
+	}
+}
+
 
 void crossover(population &pop) {
 	int nMatings = (int)(0.2*N);
@@ -252,49 +293,58 @@ void crossover_elite(population &pop) {
 	double TXY, TYX;			//Transition probability
     Array2d expX;
     Array2d expY;
-	int random_bestguy; //Guy to inject into pop.selected[1]
+	int random_bestguy1, random_bestguy2; //Guy to inject into pop.selected[1]
 	for (matings = 0; matings < nMatings; matings++) {
         ZX = 0;
         ZY = 0;
         //pop.selected 0 is a boltzmann "just good" guy. pop.selected 1 is a random any guy.
         pop.roulette_select_two_guys(ZX); //pop.selected 0 will be good, pop.selected 1 random
-
-        //Let the newguy pop.selected[1] impersonate a random bestguy but keep the temperature. Then newguy gets superpowers
-		random_bestguy = uniform_integer( 0, N_best-1);
-		pop.copy(pop.newguys[pop.selected(1)], pop.bestguys[random_bestguy]);
-		pop.newguys[pop.selected(1)].born = pop.guys[pop.selected(1)].born;		//Keep date of birth count
-		pop.newguys[pop.selected(1)].t = pop.guys[pop.selected(1)].t;			//Keep temperature
-
-		//Now pop.selected(1) is some guy high on the temperature ladder with amazing bestguy-genes and fitness
-		expX(0) = exp(-(pop.newguys[pop.selected(0)].H - pop.lowest_H)); //good guy
-		expX(1) = exp(-(pop.newguys[pop.selected(1)].H - pop.lowest_H)); //gooder guy
-        PXX = ( 1 / ((N - 1)*ZX)*(expX(0) + expX(1))); //P((xi,xj) | x)
-
-        //Make sure the guy pop.selected(0) and random_bestguys aren't already the same guy, or else they will have identical
-        //Offspring. Basically we would be copying back a bestguy into our list.
-        if ( pop.guys[pop.selected(0)]. H == pop.bestguys[random_bestguy].H){
-            //Revert changes
-            pop.copy(pop.newguys[pop.selected[0]], pop.guys[pop.selected[0]]);
-            pop.copy(pop.newguys[pop.selected[1]], pop.guys[pop.selected[1]]);
-            continue;
-        }
-		//Now mate to create offspring. Let a bestGuy inject DNA in this process!
-		crossoverPoint = uniform_integer( 1, genomeLength - 1);
-		for (int i = 0; i < genomeLength; i++) {
-			if (i < crossoverPoint) {
-				pop.newguys[pop.selected(0)].genome.copy_loci(i, pop.guys[pop.selected(0)].genome(i));
-				pop.newguys[pop.selected(1)].genome.copy_loci(i, pop.bestguys[random_bestguy].genome(i));
-			}
-			else {
-				pop.newguys[pop.selected(0)].genome.copy_loci(i, pop.bestguys[random_bestguy].genome(i));
-				pop.newguys[pop.selected(1)].genome.copy_loci(i, pop.guys[pop.selected(0)].genome(i));
-			}
+        random_bestguy1 = uniform_integer( 0, N_best-1);
+		random_bestguy2 = random_bestguy1;
+		while(random_bestguy1==random_bestguy2){
+			random_bestguy2 = uniform_integer( 0, N_best-1);
 		}
 
-		//From now on the newguys are offsprings. The parents are a good guy pop.selected 1 and a bestguy random_bestguy. Adoptive father is guy pop.selected 1
+        //Make sure the guy pop.selected(0) and random_bestguys aren't already the same guy, or else they will have identical
+        //Offspring. Basically we would be copying back a bestguy?
+        if ( pop.guys[pop.selected(0)].H == pop.bestguys[random_bestguy1].H ||  pop.guys[pop.selected(0)].H == pop.bestguys[random_bestguy2].H){
+            continue;
+        }
+		if ( pop.guys[pop.selected(1)].H == pop.bestguys[random_bestguy1].H ||  pop.guys[pop.selected(1)].H == pop.bestguys[random_bestguy2].H){
+			continue;
+		}
+
+
+        expX(0) = exp(-(pop.guys[pop.selected(0)].H - pop.lowest_H)); //good guy
+		expX(1) = exp(-(pop.guys[pop.selected(1)].H - pop.lowest_H)); //gooder guy
+        PXX = ( 1 / ((N - 1)*ZX)*(expX(0) + expX(1))); //P((xi,xj) | x)
+
+
+		//Now mate to create offspring. Let a bestGuy inject DNA in this process!
+        //The newguys will be half random bestguy, half guy selected(0)
+
+		bool notequal = pop.newguys[pop.selected(0)].H != pop.newguys[pop.selected(1)].H;
+		int num_points = uniform_integer(1, genomeLength/2);
+		ArrayXi crossoverPoints(num_points);
+		rndChoice(crossoverPoints.data(), num_points,genomeLength-1);
+		int mode = EMC_rnd::uniform_integer_1();
+		int j = 0;
+		for (int i = 0; i < genomeLength;i++){
+			if (mode == 0 ){
+				pop.newguys[pop.selected(0)].genome.copy_loci(i, pop.guys[pop.selected(1)].genome(i));
+				pop.newguys[pop.selected(1)].genome.copy_loci(i, pop.bestguys[random_bestguy1].genome(i));
+				if (i == crossoverPoints(j)){ mode = 1; j++;}
+			}else if (mode == 1){
+				pop.newguys[pop.selected(0)].genome.copy_loci(i, pop.bestguys[random_bestguy1].genome(i));
+				pop.newguys[pop.selected(1)].genome.copy_loci(i, pop.guys[pop.selected(0)].genome(i));
+				if (i == crossoverPoints(j)){ mode = 0; j++;}
+			}
+
+		}
+
+        //From now on the newguys are offsprings. The parents are a good guy pop.selected 1 and a bestguy random_bestguy. Adoptive father is guy pop.selected 1
         pop.getFitness(pop.newguys[pop.selected(0)]);
         pop.getFitness(pop.newguys[pop.selected(1)]);
-
 		expY(0) = exp(-(pop.newguys[pop.selected(0)].H - pop.lowest_H));
 		expY(1) = exp(-(pop.newguys[pop.selected(1)].H - pop.lowest_H));
 		for (int i = 0; i < N; i++) {
@@ -414,33 +464,40 @@ void crossover_snooker(population &pop) {
     double r_max = pop.line.line_max;
     double r_min = pop.line.line_min;
 	ArrayXd r_point(r_num);
-    if( std::isinf(r_min) || std::isinf(r_max)){
-        cout << "r are inf or nan!! " << endl;
-
+    if( std::isnan(r_max)){
+        cout << "r_min = "    << r_min << " r_max = " << r_max << endl;
+        cout << "r is nan!! " << endl;
         return;
     }
     if( r_min * r_max > 0){
-        cout << "r are equal!!! " << endl;
-
+        cout << "r_min = "    << r_min << " r_max = " << r_max << endl;
+        cout << "r are both positive!!! " << endl;
         return;
     }
     if (r_min == r_max){
+        cout << "r_min = "    << r_min << " r_max = " << r_max << endl;
+        cout << "r are equal!!! " << endl << endl;
         return;
     }
 
     if (fmin(r_min,r_max) > 0.0 ){
+        cout << "r_min = "    << r_min << " r_max = " << r_max << endl;
         cout << "r_min too large!!! " << endl << endl;
         exit(1);
     }
 
     if (fmax(r_min,r_max) < 1.0 ){
-        cout << "r_min too large!!! "<< endl << endl;
+        cout << "r_min = "    << r_min << " r_max = " << r_max << endl;
+        cout << "r_max too too small!!! "<< endl << endl;
         exit(1);
 
 
     }
     if (r_min == 0 || r_max == 0){
-        cout << "r are equal!!! " << endl;
+        cout << "r_min = "    << r_min << " r_max = " << r_max << endl;
+
+        cout << "r are zero!!! " << endl;
+
         exit(1);
 
     }
@@ -472,6 +529,8 @@ void crossover_snooker(population &pop) {
 		pop.guys[pop.selected(1)].genome.set_parameters(pop.snookerGuys[lowest_i].genome.parameters); //Copy his shit
 		pop.guys[pop.selected(1)].H 	= pop.snookerGuys[lowest_i].H;
 		pop.guys[pop.selected(1)].born 	= pop.count.generation;
+		pop.newguys[pop.selected(1)].born =  pop.count.generation;
+        pop.copy(pop.newguys[pop.selected(1)], pop.guys[pop.selected(1)]);
 	}
 
 

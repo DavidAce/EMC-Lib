@@ -53,6 +53,20 @@ void DNA::flip_loci(ArrayXi &loci) {
     }
 }
 
+
+void DNA::flip_loci(Ref<ArrayXi> loci) {
+    //Flip all bits in array loci
+    int gene;// = a / geneLength;
+    int locus;// = a%geneLength;
+    for (int i = 0; i < loci.size(); i++) {
+        gene = loci(i)/geneLength;
+        locus = loci(i) % geneLength;
+        chromosomes[gene][geneLength - locus - 1]  =  !chromosomes[gene][geneLength - locus - 1];
+
+    }
+}
+
+
 void DNA::copy_loci(const int a, const int bit) {
     //(loci,bit)
     bool b = bit == 1;

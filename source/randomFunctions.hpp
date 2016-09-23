@@ -48,6 +48,18 @@ namespace EMC_rnd{
             }
         }
     }
+
+
+    inline int triangular_increasing(const int lowerLimit, const int upperLimit ){
+        return (int) ( lowerLimit + (upperLimit - lowerLimit)*sqrt(uniform_double_1()));
+    }
+
+    inline int triangular_decreasing(const int lowerLimit, const int upperLimit ){
+        return (int) ( upperLimit - (upperLimit-lowerLimit) * sqrt(1-uniform_double_1()));
+    }
+
+
+
 };
 
 #endif

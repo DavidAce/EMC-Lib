@@ -23,9 +23,22 @@ public:
 	personality(objective_function &ref)
             :obj_fun(ref),
              born(0),
-             genome(ref),
-			 H(ref.fitness(genome.parameters)) //Set fitness
+             genome(ref)
 	{
+        EMC_constants::nGenes = obj_fun.num_parameters;
+        EMC_constants::nGenes = obj_fun.num_parameters;
+        EMC_constants::geneLength   = 2+min(54,(int)ceil(-log(obj_fun.tolerance)/log(2)));
+        EMC_constants::genomeLength = EMC_constants::nGenes * EMC_constants::geneLength;
+        genome.chromosomes.resize((unsigned int)nGenes);
+        genome.parameters.resize ((unsigned int)nGenes);
+        if (obj_fun.initial_conditions_passed){
+            genome.copy_initial_conditions();
+        }else{
+            genome.randomize_dna();
+
+        }
+//        H = ref.fitness(genome.parameters); //Set fitness
+//        cout << H << endl;
 
 	};
 	personality(objective_function &ref, bool toggle) :

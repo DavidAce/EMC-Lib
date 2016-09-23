@@ -69,10 +69,12 @@ void population::find_elite() {
         tried_guys.insert(lowest_i);
         j++;
         //By now we should have a winner, check if he's better than any elite
-        //We have already tried to match j guys, so we can start from j?
         for (unsigned int i = N_best ;  i-- > 0;) {
             if (lowest_H < bestguys[i].H) {
                 insertguy(lowest_i, i);
+                break;
+            }
+            if (lowest_H == bestguys[i].H) {
                 break;
             }
         }
@@ -162,6 +164,13 @@ void population::wakeUpGuys() {
 	T = LogSpaced(N,Tmax, Tmin);
     for (int i = 0; i < N; i++) {
 		guys[i].t = T(i); 		//Assign temperatures produced above
+        if (obj_fun.initial_conditions_passed){
+            guys[i].genome.copy_initial_conditions();
+        }else{
+            guys[i].genome.randomize_dna();
+        }
+        guys[i].H = obj_fun.fitness(guys[i].genome.parameters);
+//        cout << setprecision(20) << guys[i].H << endl;
     }
 }
 
@@ -187,6 +196,7 @@ void population::wakeUpBest() {
         }
         //By now we should have a winner, copy him to bestguys and add him to skiplist
         copy(bestguys[N_best - j - 1], guys[lowest_i]);
+//        cout << "Bestguy: "<< bestguys[N_best - j - 1].H << endl;
         copied_guys.insert(lowest_i);
         j++;
     }

@@ -26,8 +26,7 @@ private:
     bitset<maxbits> dec2bin(const int);
 
 //	vector<bool> dec2bin(const int);
-    void randomize_dna();
-    void copy_initial_conditions();
+
 //    Array<long double, Dynamic,1>   random_parameters();
 //    vector< bitset<maxbits> >       random_chromosomes();
 
@@ -36,18 +35,7 @@ private:
 public:
     DNA(objective_function &ref):obj_fun(ref)
     {
-        EMC_constants::nGenes = obj_fun.num_parameters;
-        EMC_constants::nGenes = obj_fun.num_parameters;
-        EMC_constants::geneLength   = 2+min(54,(int)ceil(-log(obj_fun.tolerance)/log(2)));
-        EMC_constants::genomeLength = EMC_constants::nGenes * EMC_constants::geneLength;
-        chromosomes.resize((unsigned int)nGenes);
-        parameters.resize ((unsigned int)nGenes);
-        if (obj_fun.initial_conditions_passed){
-            copy_initial_conditions();
-        }else{
-            randomize_dna();
 
-        }
     }
 
     DNA(objective_function &ref, bool ):obj_fun(ref) {
@@ -68,12 +56,15 @@ public:
     friend ostream &operator<<(std::ostream &os, DNA const &);
     void flip_loci(const int);
     void flip_loci(ArrayXi &);
+    void flip_loci(Ref<ArrayXi> );
     void copy_loci(const int, const int);
 
     void set_parameter(const int,const double);
     void set_parameters(const  ArrayXd  &p);
     void update_parameters();
     void update_chromosomes();
+    void randomize_dna();
+    void copy_initial_conditions();
 };
 
 #endif

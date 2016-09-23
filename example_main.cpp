@@ -32,8 +32,8 @@ int main(){
 
     //Mandatory arrays! Types Eigen types (Tensor, Array,Matrix,) or std::vector<double>, etc.
     //just make sure you can do .size() on it.
-    Eigen::Tensor<double,3> lower_bound(3,3,3);
-    Eigen::Tensor<double,3> upper_bound(3,3,3);
+    Eigen::Tensor<double,1> lower_bound(3);
+    Eigen::Tensor<double,1> upper_bound(3);
 
     lower_bound.setConstant(-10);
     upper_bound.setConstant(10) ;

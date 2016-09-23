@@ -31,7 +31,7 @@ namespace EMC_constants {
 	const double qm   = 0.5;							//The mutation probability vs crossover (1-qm for crossover)
 	const double qma  = 0.5;//0.005;					//elite mutation rate (qm*(1-qma) for regular mutation)
 	const double qe   = 0.5;							//elite crossover vs regular crossover
-	const int r_num   = 16;								//Number of points to sample on snooker crossover (10-100 is ok, higher is slower but more thorough)
+	const int r_num   = 8;								//Number of points to sample on snooker crossover (10-100 is ok, higher is slower but more thorough)
 	
 	//Probabilities for smart copy crossover (UNUSED)
 	const double P0 = 0.1;							//If parents have the  SAME bit, reverse with probability p0
