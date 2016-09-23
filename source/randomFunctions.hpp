@@ -50,6 +50,12 @@ namespace EMC_rnd{
     }
 
 
+    template <typename inType1, typename inType2>
+    inline inType1 gaussian(const inType2 mean, const inType2 std){
+        std::normal_distribution<double> distribution(mean,std);
+        return distribution(rng);
+    }
+
     inline int triangular_increasing(const int lowerLimit, const int upperLimit ){
         return (int) ( lowerLimit + (upperLimit - lowerLimit)*sqrt(uniform_double_1()));
     }
