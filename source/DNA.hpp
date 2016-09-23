@@ -51,14 +51,16 @@ public:
     bool operator== (const DNA& target);
     int operator()(int);
     friend ostream &operator<<(std::ostream &os, DNA const &);
+    friend ostream &operator<<(std::ostream &os, const vector< bitset<maxbits> > &);
     void flip_loci(const int);
     void flip_loci(ArrayXi &);
-    void flip_loci(Ref<ArrayXi> );
+    void flip_loci(const Ref<ArrayXi> &);
     void copy_loci(const int, const int);
 
     void set_parameter(const int,const double);
     void set_parameters(const  ArrayXd  &p);
     void update_parameters();
+    void update_parameter(const int i);
     void update_chromosomes();
     void randomize_dna();
     void copy_initial_conditions();

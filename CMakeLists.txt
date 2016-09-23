@@ -2,19 +2,11 @@ cmake_minimum_required(VERSION 2.8.9)
 project(EMC-Lib)
  
 include_directories(source)
-
-set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall -g -std=c++14 -Wno-deprecated-declarations")
-set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3 -g -std=c++14 -march=native -Wno-deprecated-declarations -DNDEBUG")
-#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -std=c++14 -funroll-loops -march=native -frename-registers -Wno-deprecated-declarations -DNDEBUG")
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR})
 # Require MPI for this project:
 find_package(MPI REQUIRED)
 include_directories(${MPI_INCLUDE_PATH})
 include_directories(eigen3)
-
-#find_package(Eigen3 REQUIRED)
-#include_directories(${EIGEN3_INCLUDE_DIR})
-
 
 
 ##################################

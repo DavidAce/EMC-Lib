@@ -103,7 +103,7 @@ void hall_of_fame::print_progress(population &pop) {
             if (pop.obj_fun.id >= 0) { cout << "ID: " << pop.obj_fun.id << " " << pop.obj_fun.name << " "; }
             cout << "Generation... " << setw(7) << pop.count.generation
                  << " | Current Best: " << setw(22) << champion_fitness
-                 << " | diff: "         << setw(22) << latest_history_diff
+                 << " | Mean decrease past " << num_check_history << " generations: "         << setw(22) << latest_history_diff
 //                 << endl << champion_parameters.transpose()
                  << endl << flush;
         }

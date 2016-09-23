@@ -13,13 +13,13 @@ namespace EMC_constants {
 	extern int geneLength;          				//Number of bits per gene (The number of possible values for a parameter is 2^geneLength-1)
 	extern int nGenes;								//Number of parameters in your model. This is set in datafiles.cpp, inData::inData
 	extern int genomeLength;						//Number of bits for all genes, This is set in datafiles.cpp, inData::inData
-    const int maxbits           = 48;               //Maximum number of bits in the binary representation of a (double) parameter.
+    const  int maxbits          = 48;                //Maximum number of bits in the binary representation of a (double) parameter.
 
-    const int max_generations 	= (int)1e5;			//Number of generations to run the simulation
-	const int rate_migration  	= 500;				//The migration rate  (in units of generations)
+    const int max_generations 	= (int)1e6;			//Number of generations to run the simulation
+	const int rate_migration  	= 50;				//The migration rate  (in units of generations)
 	const int rate_store_best  	= 50;				//The rate (in units of generations) at which the best fitness (champions) is stored
 	const int rate_check_conv  	= 50;				//The rate (in units of generations) at which convergence is checked.
-	const int rate_print		= 100;				//The migration rate
+	const int rate_print		= 500;				//The migration rate
 	const int num_check_history = 500;				//The number of (latest) stored champions that are checked for convergence.
 
     //Temperature boundaries for the ladder

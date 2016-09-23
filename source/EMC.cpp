@@ -15,7 +15,6 @@ void minimize(objective_function & obj_fun){
     EMC_constants::nGenes       = obj_fun.num_parameters;
     EMC_constants::geneLength   = maxbits;
     EMC_constants::genomeLength = EMC_constants::nGenes * EMC_constants::geneLength;
-
     //Initialize populations
     population pop(obj_fun);
     pop.obj_fun.tolerance           = fmax(1e-18, obj_fun.tolerance);
@@ -25,7 +24,7 @@ void minimize(objective_function & obj_fun){
     hall_of_fame champions;
 
 
-    Eigen::initParallel();
+//    Eigen::initParallel();
 	//Start algorithm
 	pop.count.simulation_tic = high_resolution_clock::now();
     rng.seed((unsigned long int) pop.world_ID);

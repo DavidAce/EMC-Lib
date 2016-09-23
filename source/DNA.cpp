@@ -19,6 +19,16 @@ std::ostream &operator<<(std::ostream &os, DNA const &genome) {
     return os;
 }
 
+std::ostream &operator<<(std::ostream &os, const vector< bitset<maxbits> > & chromo) {
+    for (unsigned int nIndex = chromo.size(); nIndex-- > 0; ) {
+        os << chromo[nIndex];
+    }
+    return os;
+}
+
+
+
+
 
 bool DNA::operator==(const DNA &target) { //Compare DNA and return true if equal
     bool isequal = true;
@@ -54,7 +64,7 @@ void DNA::flip_loci(ArrayXi &loci) {
 }
 
 
-void DNA::flip_loci(Ref<ArrayXi> loci) {
+void DNA::flip_loci(const Ref<ArrayXi> &loci) {
     //Flip all bits in array loci
     int gene;// = a / geneLength;
     int locus;// = a%geneLength;
@@ -97,6 +107,12 @@ void DNA::update_parameters() {
         parameters(i) = bin2dec(i);
     }
 }
+
+void DNA::update_parameter(const int i) {
+    parameters(i) = bin2dec(i);
+
+}
+
 
 void DNA::update_chromosomes() {
     for (int i = 0; i < nGenes; i++) {

@@ -120,76 +120,18 @@ inline void bitselector_smartCopy(population &pop, Array4i &n_ab_XY, Array4i &n_
 	}
 }
 
-//void mutation(population &pop) {
-//	int mutant;			//Which guy to mutate
-//	int mutantGenes =  uniform_integer( 2, genomeLength - 1);//Number of points to mutate
-//	ArrayXi loci(mutantGenes);
-//	double dH;
-//	for (int i = 0; i < N; i++) {
-//
-//		mutant = i;// uniform_integer( 0, N - 1);
-//		rndChoice(loci.data(), mutantGenes, genomeLength);				//Choose locus to mutate
-//		pop.newguys[mutant].genome.flip_loci(loci);	                    //Flip bits
-//		pop.getFitness(pop.newguys[mutant]);							//Get Fitness score
-//
-//		//Perform Metropolis
-//		dH = pop.newguys[mutant].H - pop.guys[mutant].H;		//used to decide if we accept the new guy or not.
-//		if (dH < 0 || exp(-dH / pop.newguys[mutant].t) > uniform_double_1()) {
-//			pop.newguys[mutant].born = pop.count.generation;
-//			pop.copy(pop.guys[mutant], pop.newguys[mutant]);
-//
-//		}
-//		else {
-//			//Revert changes in newguys,  i.e sync them for the next round
-//			pop.copy(pop.newguys[mutant], pop.guys[mutant]);
-//		}
-//	}
-//
-//
-//}
-//
-//void mutation_elite(population &pop) {
-//	int mutantGenes;	//Number of points to mutate
-//	int mutant;			//which guy to mutate
-//	int elite_mutant;	//Which elite guy to receive wisdom from
-//
-//	double dH; 			//Fitness difference
-//	ArrayXi loci(genomeLength);
-////	ArrayXi sub_loci(geneLength);
-//	for (int i = 0; i < N; i++) {
-//		mutant = i;
-//		elite_mutant = uniform_integer( 0, N_best - 1);
-//		pop.copy(pop.newguys[mutant].genome, pop.bestguys[elite_mutant].genome);	//Copy DNA only!
-////		cout <<endl<< pop.newguys[mutant].genome << endl << endl;
-//
-//		mutantGenes =  uniform_integer( 0, genomeLength - 1);
-//		rndChoice(loci.data(), mutantGenes, genomeLength);
-//		pop.newguys[mutant].genome.flip_loci(loci.head(mutantGenes));
-//		pop.getFitness(pop.newguys[mutant]);    									//Get Fitness score
-////		cout << pop.newguys[mutant].genome << endl << endl <<  endl;
-//
-//		//Perform metropolis
-//		dH = pop.newguys[mutant].H - pop.guys[mutant].H;		//used to decide if we accept the new guy or not.
-//		if (dH < 0 || exp(-dH / pop.newguys[mutant].t) > uniform_double_1()) {
-//			pop.newguys[mutant].born = pop.count.generation;
-//			pop.copy(pop.guys[mutant], pop.newguys[mutant]);
-//		}
-//		else {
-//			//Revert changes in newguys, i.e sync them for the next round
-//			pop.copy(pop.newguys[mutant], pop.guys[mutant]);
-//		}
-//	}
-//}
 void mutation(population &pop) {
 	int mutantGenes;	//Number of points to mutate
 	int mutant;			//Which guy to mutate
 	double dH;
+    ArrayXi loci(nGenes);
 	for (int i = 0; i < N; i++) {
-		mutantGenes =  uniform_integer( 1, genomeLength - 1);
-		ArrayXi loci(mutantGenes);
-		mutant = i;// uniform_integer( 0, N - 1);
+//		mutantGenes =  uniform_integer( 1, nGenes);
+        mutantGenes =  triangular_decreasing(1, nGenes);
+
+        mutant = i;// uniform_integer( 0, N - 1);
 		rndChoice(loci.data(), mutantGenes, genomeLength);				//Choose locus to mutate
-		pop.newguys[mutant].genome.flip_loci(loci);	                    //Flip bits
+		pop.newguys[mutant].genome.flip_loci(loci.head(mutantGenes));   //Flip bits
 		pop.getFitness(pop.newguys[mutant]);							//Get Fitness score
 
 		//Perform Metropolis
@@ -197,7 +139,6 @@ void mutation(population &pop) {
 		if (dH < 0 || exp(-dH / pop.newguys[mutant].t) > uniform_double_1()) {
 			pop.newguys[mutant].born = pop.count.generation;
 			pop.copy(pop.guys[mutant], pop.newguys[mutant]);
-
 		}
 		else {
 			//Revert changes in newguys,  i.e sync them for the next round
@@ -209,21 +150,26 @@ void mutation(population &pop) {
 }
 
 void mutation_elite(population &pop) {
-	//int mutantGenes;	//Number of points to mutate
+    int mutantGenes;	//Number of points to mutate
 	int mutant;			//which guy to mutate
 	int elite_mutant;	//Which elite guy to receive wisdom from
 	double dH;
+    ArrayXi targetGenes = ArrayXi::Zero(nGenes);
 	for (int i = 0; i < N; i++) {
-		//mutantGenes = 1;// uniform_integer( 1, genomeLength - 1);
-		int loci = uniform_integer( 1, genomeLength - 1);
-		mutant = i; //uniform_integer( 0, N - 1);
-		//Fill loci with mutantGenes genome points to be mutated
-		//Copy an elite guy to a new guy to be a guinnea pig
-		elite_mutant = uniform_integer( 0, N_best - 1);
-		pop.copy(pop.newguys[mutant].genome, pop.bestguys[elite_mutant].genome);	//Copy DNA only!
-		pop.newguys[mutant].genome.flip_loci(loci);									//Flip bits
-		pop.getFitness(pop.newguys[mutant]);    									//Get Fitness score
+        mutantGenes =  triangular_decreasing(1, nGenes);
+        mutant = i;
+        elite_mutant = uniform_integer( 0, N_best - 1);
+        pop.copy(pop.newguys[mutant].genome, pop.bestguys[elite_mutant].genome);	//Copy DNA only!
+        //Fill loci with mutantGenes genome points to be mutated
+        rndChoice(targetGenes.data(), mutantGenes, nGenes);				//Choose locus to mutate
+        for (int j = 0; j < mutantGenes; j++){
+//            cout << pop.newguys[mutant].genome.chromosomes[targetGenes(j)] << " " << pop.newguys[mutant].genome.parameters(targetGenes(j)) << endl;
+            pop.newguys[mutant].genome.flip_loci(targetGenes(j) * geneLength + triangular_increasing(0,geneLength));
+//            pop.newguys[mutant].genome.update_parameter(targetGenes(j));
+//            cout << pop.newguys[mutant].genome.chromosomes[targetGenes(j)]  << " " << pop.newguys[mutant].genome.parameters(targetGenes(j)) << endl<<endl;
 
+        }
+        pop.getFitness(pop.newguys[mutant]);							//Get Fitness score
 		//Perform metropolis
 		dH = pop.newguys[mutant].H - pop.guys[mutant].H;		//used to decide if we accept the new guy or not.
 		if (dH < 0 || exp(-dH / pop.newguys[mutant].t) > uniform_double_1()) {
@@ -244,23 +190,23 @@ void mutation_realspace(population &pop) {
 	double dH; 			//Fitness difference
 	for (int i = 0; i < N; i++) {
 		mutant = i;
-		mutantGenes = uniform_integer(1,nGenes);
+        mutantGenes = triangular_decreasing(1,nGenes);
+//        mutantGenes = uniform_integer(1,nGenes);
 		for (int j = 0; j < mutantGenes ; j++){
-			int k = uniform_integer( 0, nGenes - 1);
-            double s = pop.current_diff*fabs(fabs(pop.obj_fun.upper_bound(k) - pop.obj_fun.lower_bound(k)));
+			int k       = uniform_integer( 0, nGenes - 1);
+            double s    = fmin(pop.current_diff, 0.5)*fabs(fabs(pop.obj_fun.upper_bound(k) - pop.obj_fun.lower_bound(k)));
             pop.newguys[mutant].genome.parameters(k) = EMC_rnd::gaussian_truncated(pop.obj_fun.lower_bound(k),
 																				   pop.obj_fun.upper_bound(k),
 																				   pop.newguys[mutant].genome.parameters(k),
 																				   s);
 
         }
-		pop.newguys[mutant].genome.update_chromosomes();
 		pop.getFitness(pop.newguys[mutant]);    									//Get Fitness score
-
 		//Perform metropolis
 		dH = pop.newguys[mutant].H - pop.guys[mutant].H;		//used to decide if we accept the new guy or not.
 		if (dH < 0 || exp(-dH / pop.newguys[mutant].t) > uniform_double_1()) {
-			pop.newguys[mutant].born = pop.count.generation;
+            pop.newguys[mutant].genome.update_chromosomes();
+            pop.newguys[mutant].born = pop.count.generation;
 			pop.copy(pop.guys[mutant], pop.newguys[mutant]);
 		}
 		else {

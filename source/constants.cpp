@@ -6,7 +6,6 @@
 
 namespace EMC_constants{
     int M;  		    		//Number of populations in a species (= threads in OpenMP)
-
     int nGenes;
     int genomeLength;
     int geneLength;
