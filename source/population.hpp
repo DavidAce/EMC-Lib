@@ -153,7 +153,8 @@ private:
 
 	void wakeUpGuys();
 	void wakeUpNewGuys();
-	void wakeUpBest();
+    void wakeUpBest();
+    void wakeUpSnooker();
 public:
 	population(objective_function &ref)
 			:obj_fun        (ref),
@@ -163,9 +164,12 @@ public:
 			 snookerGuys    (r_num,ref),
              line           (ref)
     {
-                wakeUpGuys();
-                wakeUpNewGuys();
-                wakeUpBest();
+
+        wakeUpGuys();
+        wakeUpNewGuys();
+        wakeUpBest();
+        wakeUpSnooker();
+        current_diff = 1;
     };
     objective_function &obj_fun;
     vector<personality> guys; 			     //Make an array of N guys
@@ -181,6 +185,7 @@ public:
     counters count;
     int world_ID;     //Numbers for MPI communication
     int world_size;   //Numbers for MPI communication
+    double current_diff;
     void getFitness(personality &guy);
     void getFitness(const ArrayXd  &point, personality &guy);
     void copy(personality &destination, const personality & source);

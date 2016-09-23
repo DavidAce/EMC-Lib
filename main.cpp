@@ -102,7 +102,7 @@ double sum_energy (objective_function &obj_fun, Eigen::ArrayXd & in1){
                     f(imap(0, i, j)) = in(0, i-2, j-2) / r;
                     f(imap(1, i, j)) = in(1, i-2, j-2) / r;
                     f(imap(2, i, j)) = in(2, i-2, j-2) / r;
-                }else{cout << "paramters are all zero!!!\n";}
+                }else{cout << "paramterss are all zero!!!\n";}
             }
         }
     }
@@ -217,8 +217,8 @@ int main() {
     }
     lower_bound.setConstant(-1.0);
     upper_bound.setConstant(1.0);
-    objective_function obj_fun(sum_energy,lower_bound,upper_bound,1e-6,initialconditions);
-//    objective_function obj_fun(sum_energy,lower_bound,upper_bound,1e-6,ArrayXd::Zero(1));
+//    objective_function obj_fun(sum_energy,lower_bound,upper_bound,1e-6,initialconditions);
+    objective_function obj_fun(sum_energy,lower_bound,upper_bound,1e-6,ArrayXd::Zero(1));
     cout << "initial energy = " << sum_energy_final(initialconditions) << " with charge = " << sum_charge_final(initialconditions)<<"\n";
     //obj_fun.threads=6;
     minimize(obj_fun);

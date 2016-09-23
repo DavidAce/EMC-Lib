@@ -115,6 +115,8 @@ void DNA::set_parameters(const  ArrayXd &p) {
 
 
 void DNA::randomize_dna(){
+    parameters.resize(nGenes);
+    chromosomes.resize(nGenes);
     for (int i = 0; i < nGenes; i++) {
         parameters(i) = uniform_double(obj_fun.lower_bound(i), obj_fun.upper_bound(i));
         chromosomes[i] = dec2bin(i);
@@ -122,6 +124,8 @@ void DNA::randomize_dna(){
 }
 
 void DNA::copy_initial_conditions(){
+    parameters.resize(nGenes);
+    chromosomes.resize(nGenes);
     for (int i = 0; i < nGenes; i++) {
         parameters(i) = obj_fun.initial(i);
         chromosomes[i] = dec2bin(i);

@@ -38,13 +38,10 @@ public:
 
     }
 
-    DNA(objective_function &ref, bool ):obj_fun(ref) {
-        EMC_constants::nGenes = obj_fun.num_parameters;
-        EMC_constants::geneLength   = 2+min(54,(int)ceil(-log(obj_fun.tolerance)/log(2)));
-        EMC_constants::genomeLength = EMC_constants::nGenes * EMC_constants::geneLength;
-        chromosomes.resize((unsigned int)nGenes);
-        parameters.resize ((unsigned int)nGenes);
-    }
+//    DNA(objective_function &ref, bool ):obj_fun(ref) {
+//        chromosomes.resize((unsigned int)nGenes);
+//        parameters.resize ((unsigned int)nGenes);
+//    }
     objective_function &obj_fun;
 
     ArrayXd parameters;

@@ -158,6 +158,14 @@ void population::wakeUpNewGuys(){
     }
 }
 
+void population::wakeUpSnooker(){
+    int j = 0;
+    for (int i = 0; i < r_num; i++) {
+        copy(snookerGuys[i], guys[j++]);
+        if (j == N){j = 0;};
+    }
+}
+
 void population::wakeUpGuys() {
 	ArrayXd T(N);
 	//Initialize some temperature ladder, here logarithmic.

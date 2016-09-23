@@ -142,6 +142,8 @@ bool hall_of_fame::converged(population &pop) {
         if (from > 0 && n > 0){
             ArrayXd fitness_history = Map<ArrayXd>(previous_champions_fitness.data(), previous_champions_fitness.size());
             latest_history_diff = (fitness_history.segment(from-1, n) - fitness_history.segment(from,n)).mean();
+//            cout << fitness_history.segment(from, n).transpose() << endl;
+            pop.current_diff = latest_history_diff;
         }
         return fabs(latest_history_diff) < pop.obj_fun.tolerance;
     }else{

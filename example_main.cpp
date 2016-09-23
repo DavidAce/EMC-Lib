@@ -32,18 +32,20 @@ int main(){
 
     //Mandatory arrays! Types Eigen types (Tensor, Array,Matrix,) or std::vector<double>, etc.
     //just make sure you can do .size() on it.
-    Eigen::Tensor<double,1> lower_bound(3);
-    Eigen::Tensor<double,1> upper_bound(3);
+    Eigen::Tensor<double,3> lower_bound(3,3,3);
+    Eigen::Tensor<double,3> upper_bound(3,3,3);
+    Eigen::Tensor<double,3> initial_condition(3,3,3);
 
     lower_bound.setConstant(-10);
     upper_bound.setConstant(10) ;
-    double tolerance = 1e-16;   //The program terminates once the fitness does not improve beyond this tolerance
+    initial_condition.setConstant(1) ;
+    double tolerance = 1e-12;   //The program terminates once the fitness does not improve beyond this tolerance
 
 
     //This function takes arguments lower_bound, upper_bound, tolerance,
     //and then any number of auxiliary double arrays (ArrayXd or ArrayXXd) of any size.
     //These can be accessed from obj_fun.aux[0], obj_fun.aux[1] ... etc, in the same order as given
-    objective_function obj_fun(my_example_function,lower_bound, upper_bound,tolerance , ArrayXd::Zero(0),exampleData0,exampleData1);
+    objective_function obj_fun(my_example_function,lower_bound, upper_bound,tolerance , initial_condition,exampleData0,exampleData1);
     obj_fun.id = 0;
     obj_fun.name = "Parabola | ";
     //Next we pass a function to minimize.

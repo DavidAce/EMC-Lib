@@ -51,7 +51,7 @@ namespace EMC_rnd{
 
 
     template <typename inType1, typename inType2>
-    inline inType1 gaussian(const inType2 mean, const inType2 std){
+    inline double gaussian(const inType1 mean, const inType2 std){
         std::normal_distribution<double> distribution(mean,std);
         return distribution(rng);
     }

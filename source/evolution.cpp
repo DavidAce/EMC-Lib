@@ -4,7 +4,6 @@
 void evolve(population &pop) {
 	//This function selects either mutation type operators or crossover type.
 	//Then does an exchange operator, and finally finds the best guys in the population
-	pop.count.generation++;
 	int dice;
 	//Select mutation or crossover
 	if (uniform_double_1() < qm) {
@@ -23,7 +22,7 @@ void evolve(population &pop) {
 	}
     exchange(pop);
     pop.find_elite();
-
+    pop.count.generation++;
 }
 
 
@@ -248,17 +247,20 @@ void mutation_realspace(population &pop) {
 	ArrayXi mutantParameters(nGenes);
 	for (int i = 0; i < N; i++) {
 		mutant = i;
-//		elite_mutant = uniform_integer( 0, N_best - 1);
-//		pop.copy(pop.newguys[mutant].genome, pop.bestguys[elite_mutant].genome);	//Copy DNA only!
-		mutantGenes =  uniform_integer( 1, max(1,nGenes/4));
-		rndChoice(mutantParameters.data(), mutantGenes, nGenes);
+		elite_mutant = uniform_integer( 0, N_best - 1);
+		pop.copy(pop.newguys[mutant].genome, pop.bestguys[elite_mutant].genome);	//Copy DNA only!
+		mutantGenes = uniform_integer(1,nGenes);
 		for (int j = 0; j < mutantGenes ; j++){
-			int k = mutantParameters(j);
-			pop.newguys[mutant].genome.parameters(k) = EMC_rnd::gaussian_truncated(pop.obj_fun.lower_bound(k),
+			int k = uniform_integer( 0, nGenes - 1);
+            double s = pop.current_diff*fabs(fabs(pop.obj_fun.upper_bound(k) - pop.obj_fun.lower_bound(k)));
+//            cout << setw(25) << pop.newguys[mutant].genome.parameters(k) << " ";
+            pop.newguys[mutant].genome.parameters(k) = EMC_rnd::gaussian_truncated(pop.obj_fun.lower_bound(k),
 																				   pop.obj_fun.upper_bound(k),
 																				   pop.newguys[mutant].genome.parameters(k),
-																				   pop.obj_fun.tolerance * fabs(pop.obj_fun.upper_bound(k) - pop.obj_fun.lower_bound(k)));
-		}
+																				   s);
+//            cout << setw(25) << pop.newguys[mutant].genome.parameters(k) << " " << pop.current_diff<<  endl;
+
+        }
 		pop.newguys[mutant].genome.update_chromosomes();
 		pop.getFitness(pop.newguys[mutant]);    									//Get Fitness score
 
@@ -575,7 +577,7 @@ void crossover_snooker(population &pop) {
 										fmin(r_min, r_max),
 										fmax(r_min, r_max),
 										1.0,
-                                        0.5);
+                                        1.0);
 //										0.5*fmax(r_min,r_max));
 		pop.snookerGuys[i].genome.set_parameters(pop.line.pointAt(r_point(i)));
 		pop.getFitness(pop.line.pointAt(r_point(i)), pop.snookerGuys[i]);
