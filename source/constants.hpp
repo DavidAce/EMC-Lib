@@ -16,7 +16,7 @@ namespace EMC_constants {
     const  int maxbits          = 48;                //Maximum number of bits in the binary representation of a (double) parameter.
 
     const int max_generations 	= (int)1e6;			//Number of generations to run the simulation
-	const int rate_migration  	= 50;				//The migration rate  (in units of generations)
+	const int rate_migration  	= 500;				//The migration rate  (in units of generations)
 	const int rate_store_best  	= 50;				//The rate (in units of generations) at which the best fitness (champions) is stored
 	const int rate_check_conv  	= 50;				//The rate (in units of generations) at which convergence is checked.
 	const int rate_print		= 500;				//The migration rate
