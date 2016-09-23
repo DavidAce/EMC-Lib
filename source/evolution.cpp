@@ -241,24 +241,17 @@ void mutation_elite(population &pop) {
 void mutation_realspace(population &pop) {
 	int mutantGenes;	//Number of genes to mutate
 	int mutant;			//which guy to mutate
-	int elite_mutant;	//Which elite guy to receive wisdom from
-
 	double dH; 			//Fitness difference
-	ArrayXi mutantParameters(nGenes);
 	for (int i = 0; i < N; i++) {
 		mutant = i;
-		elite_mutant = uniform_integer( 0, N_best - 1);
-		pop.copy(pop.newguys[mutant].genome, pop.bestguys[elite_mutant].genome);	//Copy DNA only!
 		mutantGenes = uniform_integer(1,nGenes);
 		for (int j = 0; j < mutantGenes ; j++){
 			int k = uniform_integer( 0, nGenes - 1);
             double s = pop.current_diff*fabs(fabs(pop.obj_fun.upper_bound(k) - pop.obj_fun.lower_bound(k)));
-//            cout << setw(25) << pop.newguys[mutant].genome.parameters(k) << " ";
             pop.newguys[mutant].genome.parameters(k) = EMC_rnd::gaussian_truncated(pop.obj_fun.lower_bound(k),
 																				   pop.obj_fun.upper_bound(k),
 																				   pop.newguys[mutant].genome.parameters(k),
 																				   s);
-//            cout << setw(25) << pop.newguys[mutant].genome.parameters(k) << " " << pop.current_diff<<  endl;
 
         }
 		pop.newguys[mutant].genome.update_chromosomes();
@@ -271,7 +264,6 @@ void mutation_realspace(population &pop) {
 			pop.copy(pop.guys[mutant], pop.newguys[mutant]);
 		}
 		else {
-			//Revert changes in newguys, i.e sync them for the next round
 			pop.copy(pop.newguys[mutant], pop.guys[mutant]);
 		}
 	}

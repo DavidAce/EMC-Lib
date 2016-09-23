@@ -24,7 +24,7 @@ namespace EMC_constants {
 
     //Temperature boundaries for the ladder
     const double Tmin 			= 1e-4;			//Minimum temperature of the ladder. Preferrably between close to 1
-	const double Tmax 			= 500;				//Maximum temperature of the ladder. Preferrably around H_max
+	const double Tmax 			= 50;				//Maximum temperature of the ladder. Preferrably around H_max
 
 	
 	//Probabilities genetic operators
