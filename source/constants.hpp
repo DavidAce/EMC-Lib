@@ -17,10 +17,10 @@ namespace EMC_constants {
 
     const int max_generations 	= (int)1e5;			//Number of generations to run the simulation
 	const int rate_migration  	= 500;				//The migration rate  (in units of generations)
-	const int rate_store_best  	= 100;				//The rate (in units of generations) at which the best fitness (champions) is stored
-	const int rate_check_conv  	= 200;				//The rate (in units of generations) at which convergence is checked.
+	const int rate_store_best  	= 10;				//The rate (in units of generations) at which the best fitness (champions) is stored
+	const int rate_check_conv  	= 500;				//The rate (in units of generations) at which convergence is checked.
 	const int rate_print		= 500;				//The migration rate
-	const int num_check_history = 500;				//The number of (latest) stored champions that are checked for convergence.
+	const int num_check_history = 1000;				//The number of (latest) stored champions that are checked for convergence.
 
     //Temperature boundaries for the ladder
     const double Tmin 			= 0.0001;			//Minimum temperature of the ladder. Preferrably between close to 1

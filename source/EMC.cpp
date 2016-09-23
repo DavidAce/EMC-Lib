@@ -33,6 +33,7 @@ void minimize(objective_function & obj_fun){
         champions.store_champion(pop);
 //        cout << "ID: " << pop.world_ID << " Printing"<< " Generation = " << pop.count.generation << endl;
         champions.print_progress(pop);
+//        cout << pop.guys[N-1].H << endl;
 	}
     //Print final results
     champions.print_final_result(pop);
