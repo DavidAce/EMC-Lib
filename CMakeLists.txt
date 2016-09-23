@@ -73,5 +73,4 @@ list(REMOVE_DUPLICATES EMC_INCLUDE_DIRS)
 include_directories(${EMC_INCLUDE_DIRS})
 add_executable(EMC main.cpp ${EMC_SOURCES})
 
-#target_compile_options(EMC PUBLIC -std=c++14 -fopenmp -Wall -Wfloat-conversion -O3 -march=native -mno-avx -Wno-deprecated-declarations -DEIGEN_NO_DEBUG -DNDEBUG)
 

@@ -217,8 +217,8 @@ int main() {
     }
     lower_bound.setConstant(-1.0);
     upper_bound.setConstant(1.0);
-//    objective_function obj_fun(sum_energy,lower_bound,upper_bound,1e-6,initialconditions);
-    objective_function obj_fun(sum_energy,lower_bound,upper_bound,1e-6,ArrayXd::Zero(1));
+    objective_function obj_fun(sum_energy,lower_bound,upper_bound,1e-6,initialconditions);
+//    objective_function obj_fun(sum_energy,lower_bound,upper_bound,1e-6,ArrayXd::Zero(1));
     cout << "initial energy = " << sum_energy_final(initialconditions) << " with charge = " << sum_charge_final(initialconditions)<<"\n";
     //obj_fun.threads=6;
     minimize(obj_fun);
