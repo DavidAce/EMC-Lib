@@ -149,6 +149,7 @@ int population::roulette_select_one_guy() {
             return i;
         }
     }
+    return 0;
 }
 
 
