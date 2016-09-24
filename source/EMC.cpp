@@ -15,7 +15,7 @@ void minimize(objective_function & obj_fun){
         MPI_Comm_dup(MPI_COMM_WORLD,  &MPI_COMM_EMC);
     }else{
         //Single threaded
-        MPI_Comm_dup(MPI_COMM_SELF,&MPI_COMM_EMC);
+        MPI_Comm_dup(MPI_COMM_SELF,   &MPI_COMM_EMC);
     }
     //Start some constants;
     EMC_constants::nGenes       = obj_fun.num_parameters;
@@ -24,9 +24,9 @@ void minimize(objective_function & obj_fun){
 
     //Initialize populations
     population pop(obj_fun);
-    MPI_Comm_dup(MPI_COMM_EMC,    &pop.MPI_COMM_EMC);
-    MPI_Comm_rank(MPI_COMM_WORLD, &pop.world_ID);           //Establish thread number of this worker
-    MPI_Comm_size(MPI_COMM_WORLD, &pop.world_size);         //Get total number of threads
+    MPI_Comm_dup(MPI_COMM_EMC,  &pop.MPI_COMM_EMC);
+    MPI_Comm_rank(MPI_COMM_EMC, &pop.world_ID);           //Establish thread number of this worker
+    MPI_Comm_size(MPI_COMM_EMC, &pop.world_size);         //Get total number of threads
     pop.obj_fun.tolerance         = fmax(1e-18, obj_fun.tolerance);
 
 
