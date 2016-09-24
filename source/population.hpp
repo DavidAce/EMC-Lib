@@ -10,6 +10,7 @@
 #include <string>
 #include <fstream>
 #include <time.h>
+#include <mpi.h>
 
 #include "personality.hpp"
 #include "objective_function.hpp"
@@ -170,6 +171,8 @@ public:
         wakeUpBest();
         wakeUpSnooker();
         current_diff = 1;
+//        MPI_Comm_rank(MPI_COMM_EMC, &world_ID);           //Establish thread number of this worker
+//        MPI_Comm_size(MPI_COMM_EMC, &world_size);         //Get total number of threads
     };
     objective_function &obj_fun;
     vector<personality> guys; 			     //Make an array of N guys
@@ -185,6 +188,8 @@ public:
     counters count;
     int world_ID;     //Numbers for MPI communication
     int world_size;   //Numbers for MPI communication
+    MPI_Comm MPI_COMM_EMC;
+
     double current_diff;
     void getFitness(personality &guy);
     void getFitness(const ArrayXd  &point, personality &guy);

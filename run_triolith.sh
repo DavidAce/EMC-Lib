@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#SBATCH -J WL
+#SBATCH -J EMC
 #SBATCH -t 0-08:00:00
 #SBATCH -N 8
 #SBATCH --exclusive

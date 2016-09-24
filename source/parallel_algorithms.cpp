@@ -10,9 +10,9 @@ void migration(population &pop) {
     if (pop.count.timer_migration++ > rate_migration) {
         pop.count.timer_migration = 0;
         int go_ahead = uniform_integer_1(); //Decide with 50% chance whether you migrate this time.
-        ArrayXi whos_up_for_migration(M);
+        ArrayXi whos_up_for_migration(pop.world_size);
 
-        MPI_Allgather(&go_ahead, 1, MPI_INT, whos_up_for_migration.data(), 1, MPI_INT, MPI_COMM_WORLD);
+        MPI_Allgather(&go_ahead, 1, MPI_INT, whos_up_for_migration.data(), 1, MPI_INT, pop.MPI_COMM_EMC);
         //Make sure there are at least two who wish to migrate
         if (whos_up_for_migration.sum() < 2) { return; }
 
@@ -42,9 +42,9 @@ void migration(population &pop) {
             //Select a guy to send using the roulette wheel.
             int n = pop.roulette_select_one_guy(); //Guy chosen to migrate
             MPI_Sendrecv_replace(pop.newguys[n].genome.parameters.data(), nGenes, MPI_DOUBLE, send_to, pop.world_ID,
-                                 recv_from, recv_from, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+                                 recv_from, recv_from, pop.MPI_COMM_EMC, MPI_STATUS_IGNORE);
             MPI_Sendrecv_replace(&pop.newguys[n].H, 1, MPI_DOUBLE, send_to, pop.world_ID, recv_from, recv_from,
-                                 MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+                                 pop.MPI_COMM_EMC, MPI_STATUS_IGNORE);
 
             if (uniform_double_1() < exp(-(pop.newguys[n].H - pop.guys[n].H) / pop.newguys[n].t)) {
                 //Keep
@@ -66,12 +66,12 @@ void migration(population &pop) {
 
 void hall_of_fame::global_champion_parameters(population &pop) {
     champion_parameters = pop.bestguys[N_best - 1].genome.parameters;
-    MPI_Bcast(champion_parameters.data(), nGenes, MPI_DOUBLE, champion_pop_index, MPI_COMM_WORLD);
+    MPI_Bcast(champion_parameters.data(), nGenes, MPI_DOUBLE, champion_pop_index, pop.MPI_COMM_EMC);
 }
 
 //void hall_of_fame::global_champion_fitness(population &pop) {
 //    double champion_fitness = pop.bestguys[N_best - 1].H;
-//    MPI_Bcast(&champion_fitness, 1, MPI_DOUBLE, champion_pop_index, MPI_COMM_WORLD);
+//    MPI_Bcast(&champion_fitness, 1, MPI_DOUBLE, champion_pop_index, pop.MPI_COMM_EMC);
 //}
 
 void hall_of_fame::global_champion_fitness_and_index(population &pop) {
@@ -82,10 +82,10 @@ void hall_of_fame::global_champion_fitness_and_index(population &pop) {
     } in, out;
     in.champ = pop.local_champion_fitness();
     in.index = pop.world_ID;
-    MPI_Allreduce(&in, &out, 1, MPI_DOUBLE_INT, MPI_MINLOC, MPI_COMM_WORLD);
+    MPI_Allreduce(&in, &out, 1, MPI_DOUBLE_INT, MPI_MINLOC, pop.MPI_COMM_EMC);
     champion_fitness = out.champ;
     champion_pop_index  = out.index;
-//    MPI_Allreduce(&local_champion_H, &champion_pop_index, 1, MPI_DOUBLE, MPI_MINLOC, MPI_COMM_WORLD);
+//    MPI_Allreduce(&local_champion_H, &champion_pop_index, 1, MPI_DOUBLE, MPI_MINLOC, pop.MPI_COMM_EMC);
 }
 
 void hall_of_fame::update_global_champion(population &pop) {

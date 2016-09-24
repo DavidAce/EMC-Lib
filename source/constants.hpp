@@ -7,7 +7,6 @@ using namespace Eigen;
 namespace EMC_constants {
 
     //Evolutionary parameters
-    extern int M 				;  		    		//Number of populations in a species (= threads in OpenMP)
 	const   int N 				= 15;				//Number of individuals per population
 	const int N_best			= 5;				//Number of individuals in "hall of fame". Best individuals of all time (per population)
 	extern int geneLength;          				//Number of bits per gene (The number of possible values for a parameter is 2^geneLength-1)
@@ -20,7 +19,7 @@ namespace EMC_constants {
 	const int rate_store_best  	= 50;				//The rate (in units of generations) at which the best fitness (champions) is stored
 	const int rate_check_conv  	= 50;				//The rate (in units of generations) at which convergence is checked.
 	const int rate_print		= 500;				//The migration rate
-	const int num_check_history = 500;				//The number of (latest) stored champions that are checked for convergence.
+	const int num_check_history = 1000;				//The number of (latest) stored champions that are checked for convergence.
 
     //Temperature boundaries for the ladder
     const double Tmin 			= 1e-4;			//Minimum temperature of the ladder. Preferrably between close to 1
