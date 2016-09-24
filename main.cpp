@@ -56,8 +56,6 @@ double chargedensity(int i, int j, const  Eigen::ArrayXd & f){
 double energydensity(int i,int j, const Eigen::ArrayXd  & f){
     double enden = 0.0;
     double df[ndim][nfields];
-    double no_good;
-    no_good = 0.0;
 
     for(int n=0;n<nfields;n++) {
         df[0][n] = (-f(imap(n,i+2,j)) + 8.0 * f(imap(n,i+1,j)) - 8.0 * f(imap(n,i-1,j)) +

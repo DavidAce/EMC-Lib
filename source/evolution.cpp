@@ -220,14 +220,13 @@ void crossover(population &pop) {
 	int nMatings = (int)(0.2*N);
     Array2d expX;
     Array2d expY;
-	int crossoverPoint;
 	double rc;
     double dHt0, dHt1;
 	double PXX, PYY;			//Selection probabilities
 	double PXY = 1, PYX = 1;	//Generating probabilities (PXY = PYX for this operator)
 	double TXY, TYX;			//Transition probability
 	double ZX, ZY;		        //Sum of Boltzmann-weights for current (X) and offspring(Y) populations
-
+    ArrayXi crossoverPoints(nGenes);
 	for (int matings = 0; matings < nMatings; matings++) {
         ZX=0;
         ZY=0;
@@ -237,11 +236,24 @@ void crossover(population &pop) {
 		PXX = ( 1 / ((N - 1)*ZX)*(expX(0) + expX(1))); //P((xi,xj) | x)
 		
 		//Now mate the newguys to create offsprings
-		crossoverPoint = uniform_integer( 1, genomeLength-1);
-		for (int i = crossoverPoint; i < genomeLength; i++) {
-			pop.newguys[pop.selected(0)].genome.copy_loci(i, pop.guys[pop.selected(1)].genome(i));
-			pop.newguys[pop.selected(1)].genome.copy_loci(i, pop.guys[pop.selected(0)].genome(i));
-		}
+        int num_points = triangular_decreasing(1, nGenes);
+        crossoverPoints.fill(-1);
+        rndChoice(crossoverPoints.data(), num_points,genomeLength-1);
+        int mode = EMC_rnd::uniform_integer_1();
+        int j = 0;
+        for (int i = 0; i < genomeLength;i++){
+            if (mode == 0 ){
+                pop.newguys[pop.selected(0)].genome.copy_loci(i, pop.guys[pop.selected(1)].genome(i));
+                pop.newguys[pop.selected(1)].genome.copy_loci(i, pop.guys[pop.selected(0)].genome(i));
+                if (i == crossoverPoints(j)){ mode = 1; j++;}
+            }else if (mode == 1){
+                pop.newguys[pop.selected(0)].genome.copy_loci(i, pop.guys[pop.selected(0)].genome(i));
+                pop.newguys[pop.selected(1)].genome.copy_loci(i, pop.guys[pop.selected(1)].genome(i));
+                if (i == crossoverPoints(j)){ mode = 0; j++;}
+            }
+
+        }
+
 
         pop.getFitness(pop.newguys[pop.selected(0)]);
         pop.getFitness(pop.newguys[pop.selected(1)]);
@@ -280,7 +292,6 @@ void crossover_elite(population &pop) {
 	//Start roulette selection
 	int matings;
 	int nMatings = (int)(0.2*N);
-	int crossoverPoint;
     double ZX,ZY;
 	double rc, dHt0, dHt1;
 	double PXX, PYY;			//Selection probabilities
@@ -289,7 +300,8 @@ void crossover_elite(population &pop) {
     Array2d expX;
     Array2d expY;
 	int random_bestguy1, random_bestguy2; //Guy to inject into pop.selected[1]
-	for (matings = 0; matings < nMatings; matings++) {
+    ArrayXi crossoverPoints(nGenes);
+    for (matings = 0; matings < nMatings; matings++) {
         ZX = 0;
         ZY = 0;
         //pop.selected 0 is a boltzmann "just good" guy. pop.selected 1 is a random any guy.
@@ -316,11 +328,8 @@ void crossover_elite(population &pop) {
 
 
 		//Now mate to create offspring. Let a bestGuy inject DNA in this process!
-        //The newguys will be half random bestguy, half guy selected(0)
-
-		bool notequal = pop.newguys[pop.selected(0)].H != pop.newguys[pop.selected(1)].H;
-		int num_points = uniform_integer(1, genomeLength/2);
-		ArrayXi crossoverPoints(num_points);
+		int num_points = triangular_decreasing(1, nGenes);
+        crossoverPoints.fill(-1);
 		rndChoice(crossoverPoints.data(), num_points,genomeLength-1);
 		int mode = EMC_rnd::uniform_integer_1();
 		int j = 0;
