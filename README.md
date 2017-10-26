@@ -35,9 +35,8 @@ Please download and install from
         http://eigen.tuxfamily.org/
 
 
-##### OpenMP
-Support for the compiler flag `-fopenmp`, used to parallelize the algorithm.
 
+##### OpenMPI
 
         
 ## Usage
