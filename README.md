@@ -29,11 +29,12 @@ to build (compile) the project. To run the program, type
 A c++ compiler with support for the flag `-std=c++14`.
 
 ##### Eigen
-The Eigen math library has to be installed and found in PATH environment variable. 
+The Eigen math library has to be installed and found in PATH environment variable, or found in the root catalog of this project.
 Please download and install from
 
         http://eigen.tuxfamily.org/
-        
+
+
 ##### OpenMP
 Support for the compiler flag `-fopenmp`, used to parallelize the algorithm.
 
