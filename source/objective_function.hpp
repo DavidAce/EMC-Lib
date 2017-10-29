@@ -6,6 +6,7 @@
 #define OBJECTIVE_FUNCTION_H
 
 #include <memory>
+#include <vector>
 #include <Eigen/Dense>
 #include <Eigen/Core>
 #include "constants.hpp"
