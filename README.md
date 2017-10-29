@@ -21,19 +21,18 @@ take under 1 second while 3-6 dimensions may take tens of seconds. Around 10 dim
 #### From command line
 To build project run `build.sh`.
 
-To launch program run `run.sh`
+To launch program run `run.sh`.
 
 #### From IDE
 Some IDE's with CMake support can self-configure from the file CMakeLists.txt found in the project root folder. This
 is by far the easiest approach. Recommended: [CLion](https://www.jetbrains.com/clion/download) or [Visual Studio Code](https://code.visualstudio.com/) with C++ and CMake Tools extensions.
 
 
-
 #### Requirements
  Please install the following software before building the project.
- * C++ compiler with support for c++14 standard (tested with GNU GCC version >= 5.2).
+ * C++ compiler with support for c++14 standard and OpenMP (tested with GNU GCC version >= 5.2).
  * CMake (tested with version >= 3.7).
- * MPI (Preferrably OpenMPI).
+
  
  The package manager [Hunter](https://github.com/ruslo/hunter) is included to ease the building process.
  During the first build, the dependencies listed in CMakeLists.txt will be downloaded and installed by
