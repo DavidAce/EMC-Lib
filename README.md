@@ -39,17 +39,13 @@ is by far the easiest approach. Recommended: [CLion](https://www.jetbrains.com/c
  [Hunter](https://github.com/ruslo/hunter) automatically on any platform (Linux/OSX/Win).
  
  The following software is installed by [Hunter](https://github.com/ruslo/hunter):   
- * [Eigen](http://eigen.tuxfamily.org) for tensor support and SVD decomposition.
+ * [Eigen](http://eigen.tuxfamily.org) for linear algebracalculations. 
 
  The default installation folder in Linux is `~/.hunter`.
 
 ---
 
-##### OpenMP
-Support for the compiler flag `-fopenmp`, used to parallelize the algorithm.
-
-
-        
+      
 ## Usage
 See the example_main.cpp file for syntax details. In principle it is enough to include 
 the header `source/EMC.h` from your own project to gain access to the class object `objective_function`
