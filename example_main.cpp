@@ -1,7 +1,3 @@
-//
-// Created by david on 9/2/16.
-//
-
 #include "EMC.h"
 #include <mpi.h>
 #include <unsupported/Eigen/CXX11/Tensor>
@@ -21,7 +17,7 @@ double my_example_function(objective_function &obj_fun, ArrayXd &inputParameters
 
 
 int main(){
-    cout << "This example minimizes a 2D paraboloid f(x,y) = sqrt(x^2 + y^2) with solution (0,0)" << endl;
+    cout << "This example minimizes a 2D paraboloid H = f(x,y) = sqrt(x^2 + y^2) with solution (0,0)" << endl;
 
     //This example data is there to showcase the syntax of the program.
     Eigen::ArrayXd exampleData0(4);

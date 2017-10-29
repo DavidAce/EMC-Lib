@@ -16,17 +16,6 @@ then
 fi
 
 
-if [[ "$HOSTNAME" == *"triolith"* ]]
-then
-    echo "We're on triolith!";
-    module add cmake/3.6.1
-    module load buildenv-intel/2016-3
-    export CC=/software/apps/gcc/5.3.0/build01/bin/gcc
-    export CXX=/software/apps/gcc/5.3.0/build01/bin/g++
-else
-    echo "We're on my pc!"
-fi
-
 mkdir build
 cd build
 mkdir ${buildtype}

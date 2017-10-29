@@ -2,9 +2,4 @@
 .idea/
 outdata/
 indata/
-GPATH
-GTAGS
-GRTAGS
-.depend
-*.stackdump
-*.exe
+cmake-*/

@@ -1,17 +1,31 @@
 #!/bin/bash
-option=$1
-echo "Starting job"
-option=$1
-if [[ "$HOSTNAME" == *"triolith"* ]]
+echo "Running"
+# trap ctrl-c and call ctrl_c()
+trap ctrl_c INT
+
+if [[ "$@" == *"valgrind"* ]]
 then
-    echo "We're on triolith!";
-    if [[ "${option}" == *"valgrind"* ]]
-    then
-        sbatch run_triolith_debug.sh
-    else
-        sbatch run_triolith.sh
-    fi
+    valgrind --tool=memcheck --leak-check=full -v mpirun -n 4 ./build/Debug/EMC
+elif [[ "$@" == *"gdb"* ]]
+then
+    mpirun -n 4 xterm -e gdb ./build/Debug/WL
+#    mpirun -n 4 gdb build/Debug/WL
+
+elif [[ "$@" == *"ebug"* ]]
+then
+    ulimit -c unlimited
+    mpirun -n 4  -bind-to core:overload-allowed ./build/Debug/EMC
+elif [[ "$@" == *"elease"* ]]
+then
+    ulimit -c unlimited
+    mpirun -n 4  -bind-to core:overload-allowed ./build/Release/EMC
 else
-    echo "We're on my pc!"
-    ./run_my_pc.sh ${option}
+    ulimit -c unlimited
+    mpirun -n 4  -bind-to core:overload-allowed ./build/Release/EMC
 fi
+function ctrl_c() {
+        echo "** Trapped CTRL-C"
+}
+
+
+
