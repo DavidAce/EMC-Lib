@@ -39,7 +39,7 @@ is by far the easiest approach. Recommended: [CLion](https://www.jetbrains.com/c
  [Hunter](https://github.com/ruslo/hunter) automatically on any platform (Linux/OSX/Win).
  
  The following software is installed by [Hunter](https://github.com/ruslo/hunter):   
- * [Eigen](http://eigen.tuxfamily.org) for linear algebracalculations. 
+ * [Eigen](http://eigen.tuxfamily.org) for linear algebra calculations. 
 
  The default installation folder in Linux is `~/.hunter`.
 
