@@ -19,16 +19,9 @@ The program minimizes problems of any dimension and in general performs well des
 ## Quick Start
 
 #### From command line
-To build project, enter:
-```
-./build.sh
-```
+To build project run `build.sh`.
 
-To run executable, enter:
-
-```
-./run.sh
-```
+To launch program run `run.sh`
 
 #### From IDE
 Some IDE's with CMake support can self-configure from the file CMakeLists.txt found in the project root folder. This
