@@ -21,12 +21,11 @@ The program minimizes problems of any dimension and in general performs well des
 #### From command line
 To build project run `build.sh`.
 
-To launch program run `run.sh`
+To launch program run `run.sh`.
 
 #### From IDE
 Some IDE's with CMake support can self-configure from the file CMakeLists.txt found in the project root folder. This
 is by far the easiest approach. Recommended: [CLion](https://www.jetbrains.com/clion/download) or [Visual Studio Code](https://code.visualstudio.com/) with C++ and CMake Tools extensions.
-
 
 
 #### Requirements
