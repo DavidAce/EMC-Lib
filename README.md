@@ -15,25 +15,37 @@ References:
 The program minimizes problems of any dimension and in general performs well despite rough energy landscapes. Problems 1-3 dimensions usually
 take under 1 second while 3-6 dimensions may take tens of seconds. Around 10 dimensions takes roughly a minute.
 
+---
 ## Quick Start
-From a Linux terminal, go to the root folder where `example_main.cpp` is and run
 
-		./build.sh
-to build (compile) the project. To run the program, type
-    		
-    	./run.sh	
+#### From command line
+To build project run `build.sh`.
+
+To launch program run `run.sh`
+
+#### From IDE
+Some IDE's with CMake support can self-configure from the file CMakeLists.txt found in the project root folder. This
+is by far the easiest approach. Recommended: [CLion](https://www.jetbrains.com/clion/download) or [Visual Studio Code](https://code.visualstudio.com/) with C++ and CMake Tools extensions.
 
 
-## Prerequisites
-##### c++14
-A c++ compiler with support for the flag `-std=c++14`.
 
-##### Eigen
-The Eigen math library has to be installed and found in PATH environment variable, or included in the root directory of this project. 
-Please download and install from
+#### Requirements
+ Please install the following software before building the project.
+ * C++ compiler with support for c++14 standard (tested with GNU GCC version >= 5.2).
+ * CMake (tested with version >= 3.7).
+ * MPI (Preferrably OpenMPI).
+ 
+ The package manager [Hunter](https://github.com/ruslo/hunter) is included to ease the building process.
+ During the first build, the dependencies listed in CMakeLists.txt will be downloaded and installed by
+ [Hunter](https://github.com/ruslo/hunter) automatically on any platform (Linux/OSX/Win).
+ 
+ The following software is installed by [Hunter](https://github.com/ruslo/hunter):   
+ * [Eigen](http://eigen.tuxfamily.org) for tensor support and SVD decomposition.
 
-        http://eigen.tuxfamily.org/
-        
+ The default installation folder in Linux is `~/.hunter`.
+
+---
+
 ##### OpenMP
 Support for the compiler flag `-fopenmp`, used to parallelize the algorithm.
 
