@@ -38,7 +38,7 @@ is by far the easiest approach. Recommended: [CLion](https://www.jetbrains.com/c
 
 #### Requirements
  Please install the following software before building the project.
- * C++ compiler with support for c++14 standard (tested with GNU GCC version >= 5.2), for `ìf constexpr` suport.
+ * C++ compiler with support for c++14 standard (tested with GNU GCC version >= 5.2).
  * CMake (tested with version >= 3.7).
  * MPI (Preferrably OpenMPI).
  
